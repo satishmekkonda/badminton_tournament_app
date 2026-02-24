@@ -88,22 +88,6 @@
         .score-input.invalid { border-color: #e11d48; background-color: #fff1f2; }
         .score-input.valid { border-color: #059669; background-color: #f0fdf4; }
         .error-hint { color: #e11d48; font-size: 0.75em; display: block; margin-top: 5px; font-weight: bold; min-height: 1em; text-align: center; }
-
-        /* RESPONSIVE LAYOUT ADJUSTMENTS */
-        @media (orientation: landscape) and (min-width: 768px) {
-            #tournament-section .content-flex { display: flex; gap: 20px; align-items: flex-start; }
-            #matches-container { flex: 1.5; max-height: 70vh; overflow-y: auto; padding-right: 10px; }
-            .live-standings-box { flex: 1; margin-top: 0; position: sticky; top: 20px; }
-        }
-        
-        @media (max-width: 600px) {
-            h1 { font-size: 1.5em; }
-            .welcome-screen h2 { font-size: 1.8em; }
-            .input-group { flex-direction: column; }
-            .input-group button, .input-group input { width: 100%; }
-        }
-
-        .team-review-card { background: #f1f5f9; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 5px solid #2563eb; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -148,16 +132,7 @@
         <div id="list-int" class="left-align"></div>
         <div style="text-align: center; margin-top: 25px;">
             <button class="back" onclick="showStep('step-adv')">← Back</button>
-            <button id="gen-btn" class="hidden" onclick="prepareReview()">Review Teams →</button>
-        </div>
-    </div>
-
-    <div id="step-review" class="hidden">
-        <h2 class="left-align">Review Generated Teams</h2>
-        <div id="team-review-list" style="margin: 20px 0;"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="back" onclick="showStep('step-int')">← Back (Reshuffle)</button>
-            <button class="finish" style="width: auto; padding: 12px 30px; margin-left: 10px;" onclick="showStep('step-courts')">Next: Setup Schedule</button>
+            <button id="gen-btn" class="hidden" onclick="showStep('step-courts')">Next</button>
         </div>
     </div>
 
@@ -177,8 +152,8 @@
                 <select id="start-time"></select>
             </div>
             <div style="text-align: center; margin-top: 25px;">
-                <button class="back" onclick="showStep('step-review')">← Back</button>
-                <button class="finish" style="width: auto; padding: 12px 30px;" onclick="generateSchedule()">Generate Schedule</button>
+                <button class="back" onclick="showStep('step-int')">← Back</button>
+                <button class="finish" style="width: auto; padding: 12px 30px;" onclick="generateTeams()">Generate Schedule</button>
             </div>
         </div>
     </div>
@@ -188,17 +163,14 @@
             <div id="p-bar" class="progress-bar"></div>
             <div id="p-text" class="progress-text">Progress: 0%</div>
         </div>
-        
-        <div class="content-flex">
-            <div id="matches-container"></div>
+        <div id="matches-container"></div>
 
-            <div class="live-standings-box">
-                <h3 style="margin-top:0; color:#1e3a8a;">📊 Live Standings</h3>
-                <table style="font-size: 0.85em;">
-                    <thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
-                    <tbody id="live-body"></tbody>
-                </table>
-            </div>
+        <div class="live-standings-box">
+            <h3 style="margin-top:0; color:#1e3a8a;">📊 Live Standings</h3>
+            <table style="font-size: 0.85em;">
+                <thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
+                <tbody id="live-body"></tbody>
+            </table>
         </div>
 
         <div style="text-align: center; margin-top:20px;"><button class="back" onclick="showStep('step-courts')">← Back</button></div>
@@ -285,40 +257,16 @@
         }
     }
 
-    function prepareReview() {
-        let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
-        pairs = advPlayers.map((a, i) => ({ 
-            name: `${a} - ${sInt[i]}`, 
-            played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} 
-        }));
-        
-        document.getElementById('team-review-list').innerHTML = pairs.map((p, i) => `
-            <div class="team-review-card">
-                <strong>Team ${i+1}</strong>
-                <span>${p.name}</span>
-            </div>
-        `).join('');
-        showStep('step-review');
-    }
-
-    function generateSchedule() {
+    function generateTeams() {
         const courtLimit = parseInt(document.getElementById('court-count').value);
         let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
-        
+        let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
+        pairs = advPlayers.map((a, i) => ({ name: `${a} - ${sInt[i]}`, played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} }));
         let pool = [];
-        for (let i = 0; i < pairs.length; i++) {
-            for (let j = i + 1; j < pairs.length; j++) {
-                pool.push({ tA: i, tB: j });
-            }
-        }
+        for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) pool.push({ tA: i, tB: j });
         pool.sort((a, b) => 0.5 - Math.random()); 
-        
         matches = [];
         let totalMin = startH * 60 + startM;
-        
-        // Reset pair temporary stats for generation logic
-        pairs.forEach(p => p.played = 0);
-
         while (pool.length > 0) {
             let busy = new Set(), used = 0;
             pool.sort((a,b) => (pairs[a.tA].played + pairs[a.tB].played) - (pairs[b.tA].played + pairs[b.tB].played));
