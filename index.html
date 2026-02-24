@@ -17,42 +17,31 @@
         .today-date { font-size: 0.9em; color: #64748b; font-weight: bold; min-width: 100px; text-align: right; }
         .left-align { text-align: left; width: 100%; }
         .center-controls { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
-        .input-group { display: flex; gap: 10px; justify-content: center; width: 100%; }
+        .input-group { display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 10px; }
         h2 { color: #1e3a8a; font-size: 1.3em; margin-top: 0; }
         .hidden { display: none; }
-        input, button { padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; }
+        input, button, select { padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; }
+        input:disabled { background-color: #f1f5f9; cursor: not-allowed; }
         button { cursor: pointer; background-color: #2563eb; color: white; border: none; font-weight: bold; transition: background 0.2s; }
         button:hover { background-color: #1d4ed8; }
         button.undo { background-color: #f59e0b; }
         button.back { background-color: #64748b; margin-top: 10px; }
-        button.live-view { background-color: #8b5cf6; margin-bottom: 15px; width: 100%; }
         button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
-        button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
-        
-        /* Progress Bar */
         .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 10px; margin-bottom: 20px; height: 20px; position: relative; overflow: hidden; }
         .progress-bar { height: 100%; background-color: #059669; width: 0%; transition: width 0.3s ease; }
         .progress-text { position: absolute; width: 100%; text-align: center; font-size: 0.8em; line-height: 20px; font-weight: bold; color: #1e3a8a; }
-
-        .share-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        .email-section { border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 10px; }
-        .share-img { background-color: #0ea5e9 !important; }
-        .share-pdf { background-color: #e11d48 !important; }
-        .share-copy { background-color: #8b5cf6 !important; }
-        .share-email { background-color: #6366f1 !important; }
-        .email-input { width: 250px; border: 2px solid #6366f1; }
-
         table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
         th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: center; }
         th { background-color: #f8fafc; color: #475569; font-weight: 600; }
         .self-cell { background-color: #e2e8f0; color: #94a3b8; }
-        .winner-row { background-color: #fef3c7 !important; font-weight: bold; }
-        .partner-box { width: 80%; max-width: 400px; padding: 15px; border: 2px solid #bfdbfe; background-color: #eff6ff; border-radius: 10px; font-size: 1.2em; font-weight: bold; color: #1e40af; text-align: center; margin: 5px auto; }
-        .match-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
-        .match-card input { width: 60px; text-align: center; background: white; }
-        .invalid-score { border: 2px solid #ef4444 !important; background-color: #fee2e2; }
+        .match-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 10px; }
+        .court-label, .time-label { padding: 2px 10px; border-radius: 4px; font-size: 0.75em; color: white; font-weight: bold; margin-right: 5px; }
+        .court-label { background: #1e3a8a; }
+        .time-label { background: #64748b; }
         .player-tag { background: #dbeafe; padding: 6px 14px; border-radius: 20px; font-size: 0.9em; margin: 5px; display: inline-block; border: 1px solid #bfdbfe; font-weight: 500; }
-        .requirement-text { font-size: 1.2em; font-weight: bold; color: #e11d48; margin-bottom: 15px; }
+        .live-standings-box { margin-top: 30px; border: 2px solid #2563eb; padding: 15px; border-radius: 12px; background: #fff; }
+        .score-input.invalid { border-color: #e11d48; background-color: #fff1f2; }
+        .score-input.valid { border-color: #059669; background-color: #f0fdf4; }
     </style>
 </head>
 <body>
@@ -65,12 +54,12 @@
     </div>
 
     <div id="step-adv">
-        <h2 class="left-align">Player Registration, Skill Level: Advanced</h2>
+        <h2 class="left-align">Register Player: Captains</h2>
         <div class="center-controls">
             <div class="input-group">
-                <input type="text" id="name-adv" placeholder="Name..." onkeypress="handleEnter(event, 'Advanced')">
-                <button onclick="addPlayer('Advanced')">Add Player</button>
-                <button class="undo" onclick="undo('Advanced')">Undo</button>
+                <input type="text" id="name-adv" placeholder="Name..." onkeypress="if(event.key==='Enter') addPlayer('Captains')">
+                <button onclick="addPlayer('Captains')">Add Player</button>
+                <button class="undo" onclick="undo('Captains')">Undo</button>
             </div>
         </div>
         <div id="list-adv" class="left-align"></div>
@@ -78,227 +67,286 @@
     </div>
 
     <div id="step-int" class="hidden">
-        <h2 class="left-align">Player Registration, Skill Level: Intermediate</h2>
+        <h2 class="left-align">Register Player: Vice-Captains</h2>
         <div class="center-controls">
-            <div id="int-requirement" class="requirement-text"></div>
+            <div id="int-requirement" style="font-weight:bold; color:#e11d48; margin-bottom:15px;"></div>
             <div class="input-group">
-                <input type="text" id="name-int" placeholder="Name..." onkeypress="handleEnter(event, 'Intermediate')">
-                <button onclick="addPlayer('Intermediate')">Add Player</button>
-                <button class="undo" onclick="undo('Intermediate')">Undo</button>
+                <input type="text" id="name-int" placeholder="Name..." onkeypress="if(event.key==='Enter') addPlayer('Vice-Captains')">
+                <button id="add-int-btn" onclick="addPlayer('Vice-Captains')">Add Player</button>
+                <button class="undo" onclick="undo('Vice-Captains')">Undo</button>
             </div>
         </div>
         <div id="list-int" class="left-align"></div>
         <div style="text-align: center; margin-top: 25px;">
             <button class="back" onclick="showStep('step-adv')">← Back</button>
-            <button id="gen-btn" class="hidden" onclick="generateTeams()">Shuffle Players</button>
+            <button id="gen-btn" class="hidden" onclick="showStep('step-courts')">Next: Setup</button>
         </div>
     </div>
 
-    <div id="step-reveal" class="hidden">
-        <h2 style="text-align: center;">Teams</h2>
-        <div id="reveal-container" class="center-controls"></div>
-        <div style="text-align: center;"><button class="back" onclick="showStep('step-int')">← Edit Players</button></div>
-        <button class="finish" onclick="showStep('tournament-section')">Start Group Stage</button>
+    <div id="step-courts" class="hidden">
+        <h2 class="left-align">Tournament Setup</h2>
+        <div class="center-controls">
+            <div class="input-group">
+                <label>Available Courts:</label>
+                <select id="court-count" style="width: 80px;">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Start Time:</label>
+                <select id="start-time"></select>
+            </div>
+            <div style="text-align: center; margin-top: 25px;">
+                <button class="back" onclick="showStep('step-int')">← Back</button>
+                <button class="finish" style="width: auto; padding: 12px 30px;" onclick="generateTeams()">Generate Schedule</button>
+            </div>
+        </div>
     </div>
 
     <div id="tournament-section" class="hidden">
         <div class="progress-container">
             <div id="p-bar" class="progress-bar"></div>
-            <div id="p-text" class="progress-text">Matches Finished: 0 / 0</div>
+            <div id="p-text" class="progress-text">Progress: 0%</div>
         </div>
-        <button class="live-view" onclick="calculateResults(true)">📊 Preview Live Standings</button>
         <div id="matches-container"></div>
-        <div style="text-align: center;"><button class="back" onclick="showStep('step-reveal')">← Back to Partners</button></div>
-        <button id="calc-results-btn" class="finish" onclick="calculateResults(false)">Finish Group Stage</button>
-    </div>
 
-    <div id="results-section" class="hidden">
-        <div id="capture-area">
-            <h2 id="result-title" style="text-align: center;">Tournament Results</h2>
-            <h3 class="left-align">Score Matrix</h3>
-            <div style="overflow-x: auto;"><table id="matrix-table"></table></div>
-            <h3 class="left-align">Leader Board</h3>
-            <table id="points-table">
-                <thead><tr><th>Position</th><th>Team</th><th>Played</th><th>Wins</th><th>Lost</th><th>Points</th><th>Score</th></tr></thead>
-                <tbody id="table-body"></tbody>
+        <div class="live-standings-box">
+            <h3 style="margin-top:0; color:#1e3a8a;">📊 Live Standings</h3>
+            <table style="font-size: 0.85em;">
+                <thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
+                <tbody id="live-body"></tbody>
             </table>
         </div>
 
-        <div id="sharing-controls" style="text-align: center; margin-top: 20px;">
-            <div class="share-row">
-                <button class="share-img" onclick="shareAsImage()">📸 Image</button>
-                <button class="share-pdf" onclick="shareAsPDF()">📄 PDF</button>
-                <button class="share-copy" onclick="copyResults()">📋 Copy Table</button>
-            </div>
-            <div class="email-section">
-                <div class="input-group">
-                    <input type="email" id="target-email" class="email-input" placeholder="Enter recipient email...">
-                    <button id="email-btn" class="share-email" onclick="shareAsEmail()">📧 Send Email</button>
-                </div>
-            </div>
-        </div>
+        <div style="text-align: center; margin-top:20px;"><button class="back" onclick="showStep('step-courts')">← Back</button></div>
+        <button id="calc-results-btn" class="finish" onclick="calculateResults()">Finish Group Stage</button>
+    </div>
 
-        <div style="text-align: center; margin-top: 30px;">
-            <button class="back" id="back-to-edit" onclick="showStep('tournament-section')">← Back to Scores</button>
-            <button onclick="resetTournament()" style="background:#dc2626; color: white; margin-left: 10px;">Start a New Tournament</button>
+    <div id="results-section" class="hidden">
+        <div id="capture-results">
+            <h2 style="text-align: center;">Group Stage Stats</h2>
+            <h3>Score Matrix</h3>
+            <div style="overflow-x:auto;"><table id="matrix-table"></table></div>
+            <h3>Schedule Recap</h3>
+            <div style="overflow-x:auto;"><table id="recap-table"></table></div>
+        </div>
+        <div style="text-align: center;">
+            <button class="back" onclick="showStep('tournament-section')">← Back</button>
+            <button class="finish" style="width: auto; padding: 12px 30px; margin-left:10px;" onclick="showLeaderboard()">View Leaderboard & Playoffs →</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-section" class="hidden">
+        <div id="capture-leaderboard">
+            <h2 style="text-align: center;">Final Standings</h2>
+            <table id="points-table">
+                <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+            <div id="playoff-container" class="playoff-box"></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="back" onclick="showStep('results-section')">← Back</button>
+            <button onclick="location.reload()" style="background:#dc2626; color:white; padding:12px; border-radius:8px; border:none; font-weight:bold; margin-left:10px;">New Tournament</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- EMAILJS CONFIG ---
     (function(){ emailjs.init("YOUR_PUBLIC_KEY"); })();
-    const EMAIL_SERVICE_ID = "YOUR_SERVICE_ID"; 
-    const EMAIL_TEMPLATE_ID = "YOUR_TEMPLATE_ID"; 
-
     const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     document.getElementById('date-display').innerText = today;
-    let advPlayers = [], intPlayers = [], pairs = [], matches = [], sortedResults = [];
+    
+    let advPlayers = [], intPlayers = [], pairs = [], matches = [];
 
-    function handleEnter(event, level) { if (event.key === "Enter") { event.preventDefault(); addPlayer(level); } }
-    function showStep(id) { 
-        document.querySelectorAll('.container > div:not(.header-row)').forEach(d => d.classList.add('hidden')); 
-        document.getElementById(id).classList.remove('hidden'); 
-    }
+    const st = document.getElementById('start-time');
+    for(let h=8; h<=22; h++) for(let m of ['00','30']) st.options.add(new Option(`${h}:${m}`, `${h}:${m}`));
+
+    function showStep(id) { document.querySelectorAll('.container > div:not(.header-row)').forEach(d => d.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
 
     function addPlayer(lvl) {
-        const inp = document.getElementById(lvl === 'Advanced' ? 'name-adv' : 'name-int');
+        const isCap = lvl === 'Captains';
+        const inp = document.getElementById(isCap ? 'name-adv' : 'name-int');
         const name = inp.value.trim();
-        if (!name || advPlayers.includes(name) || intPlayers.includes(name)) return;
-        if (lvl === 'Intermediate' && intPlayers.length >= advPlayers.length) return;
-        lvl === 'Advanced' ? advPlayers.push(name) : intPlayers.push(name);
-        inp.value = ''; inp.focus(); renderLists();
+        
+        if (!name) return;
+        
+        // Strict Requirement: Cap Vice-Captains at Captain count
+        if (!isCap && intPlayers.length >= advPlayers.length) {
+            alert("Limit reached! You cannot add more Vice-Captains than Captains.");
+            return;
+        }
+
+        if (advPlayers.includes(name) || intPlayers.includes(name)) return alert("Duplicate name detected!");
+        
+        isCap ? advPlayers.push(name) : intPlayers.push(name);
+        inp.value = ''; 
+        renderLists();
     }
 
-    function undo(lvl) { lvl === 'Advanced' ? advPlayers.pop() : intPlayers.pop(); renderLists(); }
+    function undo(lvl) { lvl === 'Captains' ? advPlayers.pop() : intPlayers.pop(); renderLists(); }
 
     function renderLists() {
         document.getElementById('list-adv').innerHTML = advPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
         document.getElementById('list-int').innerHTML = intPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
+        
         document.getElementById('btn-to-int').classList.toggle('hidden', advPlayers.length < 2);
+        
         const diff = advPlayers.length - intPlayers.length;
-        const rt = document.getElementById('int-requirement');
-        if (diff > 0) { rt.innerText = `**Require ${diff} Intermediate Players(s)`; rt.style.color = "#e11d48"; document.getElementById('gen-btn').classList.add('hidden'); }
-        else { rt.innerText = "**REGISTRATION COMPLETED!"; rt.style.color = "#059669"; document.getElementById('gen-btn').classList.toggle('hidden', advPlayers.length === 0); }
+        const intInp = document.getElementById('name-int');
+        const intBtn = document.getElementById('add-int-btn');
+
+        if (diff > 0) {
+            document.getElementById('int-requirement').innerText = `Require ${diff} more Vice-Captains`;
+            intInp.disabled = false;
+            intBtn.style.display = 'inline-block';
+            document.getElementById('gen-btn').classList.add('hidden');
+        } else {
+            document.getElementById('int-requirement').innerText = advPlayers.length > 0 ? "Registration Complete" : "";
+            intInp.disabled = true;
+            intBtn.style.display = 'none';
+            document.getElementById('gen-btn').classList.toggle('hidden', advPlayers.length === 0);
+        }
     }
 
     function generateTeams() {
+        const courtLimit = parseInt(document.getElementById('court-count').value);
+        let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
         let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
         pairs = advPlayers.map((a, i) => ({ name: `${a} - ${sInt[i]}`, played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} }));
-        document.getElementById('reveal-container').innerHTML = pairs.map(p => `<div class="partner-box">${p.name}</div>`).join('');
+        
+        let pool = [];
+        for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) pool.push({ tA: i, tB: j });
+        pool.sort((a, b) => 0.5 - Math.random()); 
+
         matches = [];
-        for (let i = 0; i < pairs.length; i++) {
-            for (let j = i + 1; j < pairs.length; j++) matches.push({ tA: i, tB: j, sA: 0, sB: 0, ok: true, done: false });
+        let totalMin = startH * 60 + startM;
+
+        while (pool.length > 0) {
+            let busy = new Set(), used = 0;
+            pool.sort((a,b) => (pairs[a.tA].played + pairs[a.tB].played) - (pairs[b.tA].played + pairs[b.tB].played));
+            
+            for (let i = 0; i < pool.length; i++) {
+                let m = pool[i];
+                if (!busy.has(m.tA) && !busy.has(m.tB) && used < courtLimit) {
+                    m.time = `${Math.floor(totalMin/60).toString().padStart(2,'0')}:${(totalMin%60).toString().padStart(2,'0')}`;
+                    m.court = used + 1;
+                    m.sA = ''; m.sB = ''; m.done = false;
+                    matches.push(pool.splice(i, 1)[0]);
+                    busy.add(m.tA); busy.add(m.tB);
+                    pairs[m.tA].played++; pairs[m.tB].played++;
+                    used++; i--;
+                }
+            }
+            totalMin += 20; 
         }
-        showStep('step-reveal');
+        showStep('tournament-section');
         renderMatches();
-        updateProgress();
+        updateLiveTable();
     }
 
     function renderMatches() {
         document.getElementById('matches-container').innerHTML = matches.map((m, i) => `
             <div class="match-card">
-                <span style="flex:1;text-align:right;font-weight:bold;">${pairs[m.tA].name}</span>
-                <div style="margin:0 15px">
-                    <input type="number" id="m-${i}-a" data-idx="${i}" data-side="a" value="${m.sA||''}" oninput="autoNext(this); upd(${i})" onkeydown="limitDigits(event)" placeholder="0"> - 
-                    <input type="number" id="m-${i}-b" data-idx="${i}" data-side="b" value="${m.sB||''}" oninput="autoNext(this); upd(${i})" onkeydown="limitDigits(event)" placeholder="0">
+                <div><span class="time-label">${m.time}</span><span class="court-label">COURT ${m.court}</span></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <span style="flex:1;text-align:right;font-weight:bold;">${pairs[m.tA].name}</span>
+                    <div style="margin:0 15px">
+                        <input type="number" id="m-${i}-a" class="score-input" oninput="upd(${i}, 'a')" placeholder="0" style="width:55px; text-align:center;"> - 
+                        <input type="number" id="m-${i}-b" class="score-input" oninput="upd(${i}, 'b')" placeholder="0" style="width:55px; text-align:center;">
+                    </div>
+                    <span style="flex:1;text-align:left;font-weight:bold;">${pairs[m.tB].name}</span>
                 </div>
-                <span style="flex:1;text-align:left;font-weight:bold;">${pairs[m.tB].name}</span>
-            </div>
-        `).join('');
+            </div>`).join('');
     }
 
-    function limitDigits(e) { if (e.target.value.length >= 2 && e.key !== 'Backspace' && e.key !== 'Tab') e.preventDefault(); }
+    function upd(i, side) {
+        const inpA = document.getElementById(`m-${i}-a`);
+        const inpB = document.getElementById(`m-${i}-b`);
+        const valA = parseInt(inpA.value);
+        const valB = parseInt(inpB.value);
+        
+        matches[i].sA = inpA.value;
+        matches[i].sB = inpB.value;
 
-    function autoNext(el) {
-        if (el.value.length >= 2) {
-            const idx = parseInt(el.getAttribute('data-idx'));
-            const side = el.getAttribute('data-side');
-            let next = (side === 'a') ? document.getElementById(`m-${idx}-b`) : document.getElementById(`m-${idx+1}-a`);
-            if (next) next.focus();
+        const hasScore = !isNaN(valA) && !isNaN(valB);
+        const winnerScore = Math.max(valA, valB);
+        const scoreDiff = Math.abs(valA - valB);
+        const isValidMatch = hasScore && winnerScore >= 21 && scoreDiff >= 2;
+
+        matches[i].done = isValidMatch;
+
+        if (hasScore) {
+            inpA.classList.toggle('valid', isValidMatch); inpA.classList.toggle('invalid', !isValidMatch);
+            inpB.classList.toggle('valid', isValidMatch); inpB.classList.toggle('invalid', !isValidMatch);
         }
-    }
 
-    function upd(i) {
-        const a = parseInt(document.getElementById(`m-${i}-a`).value) || 0;
-        const b = parseInt(document.getElementById(`m-${i}-b`).value) || 0;
-        matches[i].sA = a; matches[i].sB = b;
-        matches[i].done = (a > 0 || b > 0);
-        matches[i].ok = (!matches[i].done) || Math.abs(a - b) >= 2;
-        document.getElementById(`m-${i}-a`).classList.toggle('invalid-score', !matches[i].ok);
-        document.getElementById(`m-${i}-b`).classList.toggle('invalid-score', !matches[i].ok);
-        updateProgress();
-    }
+        const currentInput = document.getElementById(`m-${i}-${side}`);
+        if (currentInput.value.length >= 2 || parseInt(currentInput.value) > 9) {
+            if (side === 'a') { inpB.focus(); } 
+            else if (matches[i+1]) { document.getElementById(`m-${i+1}-a`).focus(); }
+        }
 
-    function updateProgress() {
-        const doneCount = matches.filter(m => m.done && m.ok).length;
-        const pct = (doneCount / matches.length) * 100;
+        let pct = Math.round((matches.filter(m => m.done).length / matches.length) * 100);
         document.getElementById('p-bar').style.width = pct + '%';
-        document.getElementById('p-text').innerText = `Matches Finished: ${doneCount} / ${matches.length}`;
-        document.getElementById('calc-results-btn').disabled = (doneCount < matches.length);
+        document.getElementById('p-text').innerText = `Progress: ${pct}%`;
+        
+        updateLiveTable(); 
     }
 
-    function calculateResults(isPreview) {
-        pairs.forEach(p => { p.played = 0; p.wins = 0; p.lost = 0; p.points = 0; p.score = 0; p.results = {}; });
+    function updateLiveTable() {
+        let liveStats = pairs.map(p => ({ name: p.name, played: 0, wins: 0, lost: 0, points: 0, score: 0 }));
         matches.forEach(m => {
             if (!m.done) return;
-            pairs[m.tA].played++; pairs[m.tB].played++;
-            pairs[m.tA].score += m.sA; pairs[m.tB].score += m.sB;
-            pairs[m.tA].results[m.tB] = `${m.sA}-${m.sB}`; pairs[m.tB].results[m.tA] = `${m.sB}-${m.sA}`;
-            if (m.sA > m.sB) { pairs[m.tA].wins++; pairs[m.tA].points += 2; pairs[m.tB].lost++; }
-            else { pairs[m.tB].wins++; pairs[m.tB].points += 2; pairs[m.tA].lost++; }
+            let a = parseInt(m.sA), b = parseInt(m.sB);
+            liveStats[m.tA].played++; liveStats[m.tB].played++;
+            liveStats[m.tA].score += a; liveStats[m.tB].score += b;
+            if (a > b) { liveStats[m.tA].wins++; liveStats[m.tA].points += 2; liveStats[m.tB].lost++; }
+            else { liveStats[m.tB].wins++; liveStats[m.tB].points += 2; liveStats[m.tA].lost++; }
         });
-        sortedResults = [...pairs].sort((a, b) => b.points - a.points || b.score - a.score);
+        liveStats.sort((a, b) => b.points - a.points || b.score - a.score);
+        document.getElementById('live-body').innerHTML = liveStats.map(p => 
+            `<tr><td>${p.name}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.lost}</td><td>${p.points}</td><td>${p.score}</td></tr>`
+        ).join('');
+    }
+
+    function calculateResults() {
+        pairs.forEach(p => { p.played=0; p.wins=0; p.lost=0; p.points=0; p.score=0; p.results={}; });
+        matches.forEach(m => {
+            if(m.sA === '' || m.sB === '') return;
+            let a = parseInt(m.sA), b = parseInt(m.sB);
+            pairs[m.tA].played++; pairs[m.tB].played++;
+            pairs[m.tA].score += a; pairs[m.tB].score += b;
+            pairs[m.tA].results[m.tB] = `${a}-${b}`; pairs[m.tB].results[m.tA] = `${b}-${a}`;
+            if(a > b) { pairs[m.tA].wins++; pairs[m.tA].points+=2; pairs[m.tB].lost++; }
+            else { pairs[m.tB].wins++; pairs[m.tB].points+=2; pairs[m.tA].lost++; }
+        });
         
-        // Matrix Render
         let mx = `<tr><th>Teams</th>` + pairs.map(p => `<th>${p.name}</th>`).join('') + `</tr>`;
         pairs.forEach((r, i) => {
             mx += `<tr><td><strong>${r.name}</strong></td>`;
-            pairs.forEach((_, j) => mx += (i === j) ? `<td class="self-cell">X</td>` : `<td>${r.results[j] || '—'}</td>`);
+            pairs.forEach((_, j) => mx += (i===j) ? `<td class="self-cell">X</td>` : `<td>${r.results[j] || '—'}</td>`);
             mx += `</tr>`;
         });
         document.getElementById('matrix-table').innerHTML = mx;
-        
-        // Table Render with Gold Highlight
-        document.getElementById('table-body').innerHTML = sortedResults.map((p, i) => `
-            <tr class="${i === 0 && !isPreview ? 'winner-row' : ''}">
-                <td>${i+1}</td><td>${p.name}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.lost}</td><td>${p.points}</td><td>${p.score}</td>
-            </tr>`).join('');
-        
-        document.getElementById('result-title').innerText = isPreview ? "LIVE Standings (Preview)" : "Final Results";
-        document.getElementById('sharing-controls').classList.toggle('hidden', isPreview);
+        document.getElementById('recap-table').innerHTML = `<thead><tr><th>Time</th><th>Court</th><th>Match</th><th>Score</th></tr></thead>` + 
+            matches.map(m => `<tr><td>${m.time}</td><td>${m.court}</td><td>${pairs[m.tA].name} vs ${pairs[m.tB].name}</td><td>${m.sA}-${m.sB}</td></tr>`).join('');
         showStep('results-section');
     }
 
-    function resetTournament() { if(confirm("Full Reset?")) location.reload(); }
-
-    async function shareAsImage() {
-        const canvas = await html2canvas(document.getElementById('capture-area'));
-        const link = document.createElement('a');
-        link.download = `BPL_Results.png`; link.href = canvas.toDataURL(); link.click();
-    }
-
-    function shareAsPDF() {
-        const doc = new jspdf.jsPDF();
-        doc.text(`BPL 2026 Results (${today})`, 14, 15);
-        doc.autoTable({ html: '#points-table', startY: 25 });
-        doc.autoTable({ html: '#matrix-table', startY: doc.lastAutoTable.finalY + 15 });
-        doc.save(`BPL_Results.pdf`);
-    }
-
-    function copyResults() {
-        let b = `BPL 2026 Results (${today})\n\nPos | Team | Pts | Score\n`;
-        sortedResults.forEach((p, i) => b += `${i + 1} | ${p.name} | ${p.points} | ${p.score}\n`);
-        navigator.clipboard.writeText(b).then(() => alert("Copied!"));
-    }
-
-    function shareAsEmail() {
-        const email = document.getElementById('target-email').value;
-        if (!email) return alert("Enter email.");
-        let b = `BPL 2026 Results (${today})\n\nPos | Team | Pts | Score\n`;
-        sortedResults.forEach((p, i) => b += `${i + 1} | ${p.name} | ${p.points} | ${p.score}\n`);
-        emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, { to_email: email, message: b })
-            .then(() => alert("Sent!"), () => alert("Error!"));
+    function showLeaderboard() {
+        let sorted = [...pairs].sort((a,b) => b.points - a.points || b.score - a.score);
+        document.getElementById('table-body').innerHTML = sorted.map((p, i) => `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.lost}</td><td>${p.points}</td><td>${p.score}</td></tr>`).join('');
+        
+        let playoffHtml = (pairs.length >= 6) ? 
+            `<h3>🏆 Semifinals</h3><p><strong>Semi 1:</strong> ${sorted[0].name} vs ${sorted[3].name}</p><p><strong>Semi 2:</strong> ${sorted[1].name} vs ${sorted[2].name}</p>` : 
+            `<h3>🏆 Grand Final</h3><p>${sorted[0].name} vs ${sorted[1].name}</p>`;
+        
+        document.getElementById('playoff-container').innerHTML = playoffHtml;
+        showStep('leaderboard-section');
     }
 </script>
 </body>
