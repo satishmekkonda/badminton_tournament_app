@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPL - Łódź</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #1a1a1b; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        
+        /* Centered Header */
+        .header-section { text-align: center; border-bottom: 3px solid #2563eb; margin-bottom: 30px; padding-bottom: 10px; position: relative; }
+        h1 { color: #1e3a8a; font-size: 2.2em; margin: 0; }
+        .today-date { font-size: 0.9em; color: #64748b; font-weight: bold; position: absolute; right: 0; bottom: 10px; }
+
+        h2 { color: #1e3a8a; font-size: 1.3em; margin-top: 0; }
+        .hidden { display: none; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        input, button { padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; }
+        button { cursor: pointer; background-color: #2563eb; color: white; border: none; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #1d4ed8; }
+        button.undo { background-color: #f59e0b; }
+        button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
+        button.share-btn { background-color: #0ea5e9; margin: 10px; }
+        button.email-btn { background-color: #7c3aed; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+        th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: center; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 600; }
+        .self-cell { background-color: #e2e8f0; color: #94a3b8; }
+        
+        .match-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .match-card input { width: 60px; text-align: center; background: white; }
+        .invalid-score { border: 2px solid #ef4444 !important; background-color: #fee2e2; }
+        
+        .player-tag { background: #dbeafe; padding: 6px 14px; border-radius: 20px; font-size: 0.9em; margin: 5px; display: inline-block; border: 1px solid #bfdbfe; font-weight: 500; }
+        .email-section { background: #f8fafc; padding: 25px; border-radius: 10px; margin-top: 40px; border: 1px dashed #94a3b8; text-align: center; }
+        
+        /* Area for Image Share */
+        #capture-area { padding: 20px; background: white; border-radius: 10px; }
+        #capture-area h2 { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h1>BPL - Łódź</h1>
+        <div id="date-display" class="today-date"></div>
+    </div>
+
+    <div id="step-adv">
+        <h2>Add Advanced Players</h2>
+        <div class="input-group">
+            <input type="text" id="name-adv" placeholder="Name..." onkeypress="handleEnter(event, 'Advanced')">
+            <button onclick="addPlayer('Advanced')">Add</button>
+        </div>
+        <div id="list-adv" style="text-align: center;"></div>
+        <div style="text-align: center; margin-top: 25px;">
+            <button id="btn-to-int" class="hidden" onclick="showStep('step-int')">Next: Intermediate</button>
+            <button class="undo" onclick="undo()">Undo</button>
+        </div>
+    </div>
+
+    <div id="step-int" class="hidden">
+        <h2>Add Intermediate Players</h2>
+        <p id="int-status" style="text-align:center; font-weight:bold; color:#2563eb;"></p>
+        <div class="input-group">
+            <input type="text" id="name-int" placeholder="Name..." onkeypress="handleEnter(event, 'Intermediate')">
+            <button onclick="addPlayer('Intermediate')">Add</button>
+        </div>
+        <div id="list-int" style="text-align: center;"></div>
+        <div style="text-align: center; margin-top: 25px;">
+            <button id="gen-btn" class="hidden" onclick="generateTeams()">Generate Teams & Start</button>
+            <button class="undo" onclick="undo()">Undo</button>
+        </div>
+    </div>
+
+    <div id="tournament-section" class="hidden">
+        <h2>Enter Match Scores</h2>
+        <div id="matches-container"></div>
+        <button class="finish" onclick="calculateResults()">Generate Final Rankings</button>
+    </div>
+
+    <div id="results-section" class="hidden">
+        <div id="capture-area">
+            <h2>BPL - Łódź Official Results</h2>
+            <p style="text-align:center; font-size: 0.9em; color: #64748b;" id="capture-date"></p>
+            
+            <h3>Score Matrix</h3>
+            <div style="overflow-x: auto;"><table id="matrix-table"></table></div>
+
+            <h3>Standings</h3>
+            <table id="points-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Team</th>
+                        <th>Played</th>
+                        <th>Wins</th>
+                        <th>Lost</th>
+                        <th>Points</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="share-btn" onclick="shareAsImage()">📸 Share Results as Image</button>
+        </div>
+
+        <div class="email-section">
+            <h3>Email Results</h3>
+            <div class="input-group">
+                <input type="email" id="target-email" placeholder="recipient@example.com">
+                <button class="email-btn" onclick="sendBackgroundEmail()">Send Email</button>
+            </div>
+            <p id="email-status" style="margin-top:10px; font-weight:bold;"></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="location.reload()" style="background:#64748b">New Tournament</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY"; 
+    const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
+    const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+
+    // Date Logic
+    const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    document.getElementById('date-display').innerText = today;
+    document.getElementById('capture-date').innerText = today;
+
+    if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    let advPlayers = [], intPlayers = [], pairs = [], matches = [], history = [], sortedResults = [];
+
+    function handleEnter(event, level) {
+        if (event.key === "Enter") { event.preventDefault(); addPlayer(level); }
+    }
+
+    function saveState() { history.push(JSON.stringify({ advPlayers, intPlayers, pairs, matches })); }
+
+    function undo() {
+        if (history.length > 0) {
+            const prev = JSON.parse(history.pop());
+            advPlayers = prev.advPlayers; intPlayers = prev.intPlayers;
+            renderLists();
+        }
+    }
+
+    function addPlayer(lvl) {
+        const inp = document.getElementById(lvl === 'Advanced' ? 'name-adv' : 'name-int');
+        if (!inp.value.trim()) return;
+        saveState();
+        lvl === 'Advanced' ? advPlayers.push(inp.value.trim()) : intPlayers.push(inp.value.trim());
+        inp.value = ''; inp.focus(); renderLists();
+    }
+
+    function renderLists() {
+        document.getElementById('list-adv').innerHTML = advPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
+        document.getElementById('list-int').innerHTML = intPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
+        document.getElementById('btn-to-int').classList.toggle('hidden', advPlayers.length < 2);
+        const diff = advPlayers.length - intPlayers.length;
+        document.getElementById('int-status').innerText = diff > 0 ? `Need ${diff} more Intermediate players` : "Balanced!";
+        document.getElementById('gen-btn').classList.toggle('hidden', diff !== 0 || advPlayers.length === 0);
+    }
+
+    function showStep(id) {
+        document.getElementById('step-adv').classList.add('hidden');
+        document.getElementById('step-int').classList.add('hidden');
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function generateTeams() {
+        saveState();
+        let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
+        pairs = advPlayers.map((a, i) => ({
+            name: `${a} / ${sInt[i]}`, played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {}
+        }));
+        matches = [];
+        for (let i = 0; i < pairs.length; i++) {
+            for (let j = i + 1; j < pairs.length; j++) {
+                matches.push({ tA: i, tB: j, sA: 0, sB: 0, ok: false });
+            }
+        }
+        showStep('tournament-section');
+        renderMatches();
+    }
+
+    function renderMatches() {
+        document.getElementById('matches-container').innerHTML = matches.map((m, i) => `
+            <div class="match-card">
+                <span style="flex:1;text-align:right;font-weight:bold;">${pairs[m.tA].name}</span>
+                <div style="margin:0 15px"><input type="number" id="m-${i}-a" value="${m.sA}" onchange="upd(${i})"> - <input type="number" id="m-${i}-b" value="${m.sB}" onchange="upd(${i})"></div>
+                <span style="flex:1;text-align:left;font-weight:bold;">${pairs[m.tB].name}</span>
+            </div>
+        `).join('');
+    }
+
+    function upd(i) {
+        const a = parseInt(document.getElementById(`m-${i}-a`).value) || 0;
+        const b = parseInt(document.getElementById(`m-${i}-b`).value) || 0;
+        const ok = Math.abs(a - b) >= 2 || (a === 0 && b === 0);
+        document.getElementById(`m-${i}-a`).classList.toggle('invalid-score', !ok);
+        document.getElementById(`m-${i}-b`).classList.toggle('invalid-score', !ok);
+        matches[i].sA = a; matches[i].sB = b; matches[i].ok = ok;
+    }
+
+    function calculateResults() {
+        if (matches.some(m => !m.ok)) return alert("Fix scores!");
+        pairs.forEach(p => { p.played = 0; p.wins = 0; p.lost = 0; p.points = 0; p.score = 0; p.results = {}; });
+        matches.forEach(m => {
+            pairs[m.tA].played++; pairs[m.tB].played++;
+            pairs[m.tA].score += m.sA; pairs[m.tB].score += m.sB;
+            pairs[m.tA].results[m.tB] = `${m.sA}-${m.sB}`;
+            pairs[m.tB].results[m.tA] = `${m.sB}-${m.sA}`;
+            if (m.sA > m.sB) { pairs[m.tA].wins++; pairs[m.tA].points += 2; pairs[m.tB].lost++; }
+            else { pairs[m.tB].wins++; pairs[m.tB].points += 2; pairs[m.tA].lost++; }
+        });
+        sortedResults = [...pairs].sort((a, b) => b.points - a.points || b.score - a.score);
+        
+        let mx = `<tr><th>Teams</th>` + pairs.map(p => `<th>${p.name}</th>`).join('') + `</tr>`;
+        pairs.forEach((r, i) => {
+            mx += `<tr><td><strong>${r.name}</strong></td>`;
+            pairs.forEach((_, j) => mx += (i === j) ? `<td class="self-cell">X</td>` : `<td>${r.results[j] || '0-0'}</td>`);
+            mx += `</tr>`;
+        });
+        document.getElementById('matrix-table').innerHTML = mx;
+        document.getElementById('table-body').innerHTML = sortedResults.map((p, i) => `
+            <tr><td>${i+1}</td><td>${p.name}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.lost}</td><td style="font-weight:bold;color:#2563eb">${p.points}</td><td>${p.score}</td></tr>
+        `).join('');
+        document.getElementById('tournament-section').classList.add('hidden');
+        document.getElementById('results-section').classList.remove('hidden');
+    }
+
+    async function shareAsImage() {
+        const area = document.getElementById('capture-area');
+        const canvas = await html2canvas(area);
+        const image = canvas.toDataURL("image/png");
+        
+        if (navigator.share) {
+            const blob = await (await fetch(image)).blob();
+            const file = new File([blob], "BPL_Results.png", { type: "image/png" });
+            navigator.share({ files: [file], title: 'BPL - Łódź Results' });
+        } else {
+            const link = document.createElement('a');
+            link.download = 'BPL_Results.png';
+            link.href = image;
+            link.click();
+            alert("Image downloaded!");
+        }
+    }
+
+    function sendBackgroundEmail() {
+        const mail = document.getElementById('target-email').value;
+        const stat = document.getElementById('email-status');
+        if (!mail || EMAILJS_PUBLIC_KEY.includes("YOUR")) return alert("Check Keys!");
+        stat.innerText = "Sending...";
+        let msg = "BPL - Łódź Results:\n";
+        sortedResults.forEach((p, i) => msg += `${i+1}. ${p.name} | Pts: ${p.points} | Score: ${p.score}\n`);
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: mail, message: msg })
+            .then(() => { stat.style.color="green"; stat.innerText="✅ Sent!"; })
+            .catch(() => { stat.style.color="red"; stat.innerText="❌ Failed."; });
+    }
+</script>
+</body>
+</html>
