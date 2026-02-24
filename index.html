@@ -42,6 +42,7 @@
         .live-standings-box { margin-top: 30px; border: 2px solid #2563eb; padding: 15px; border-radius: 12px; background: #fff; }
         .score-input.invalid { border-color: #e11d48; background-color: #fff1f2; }
         .score-input.valid { border-color: #059669; background-color: #f0fdf4; }
+        .error-hint { color: #e11d48; font-size: 0.75em; display: block; margin-top: 5px; font-weight: bold; min-height: 1em; text-align: center; }
     </style>
 </head>
 <body>
@@ -145,7 +146,7 @@
                 <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
-            <div id="playoff-container" class="playoff-box"></div>
+            <div id="playoff-container" class="playoff-box" style="background: #eff6ff; border: 2px dashed #2563eb; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;"></div>
         </div>
         
         <div style="text-align: center; margin-top: 20px;">
@@ -171,17 +172,12 @@
         const isCap = lvl === 'Captains';
         const inp = document.getElementById(isCap ? 'name-adv' : 'name-int');
         const name = inp.value.trim();
-        
         if (!name) return;
-        
-        // Strict Requirement: Cap Vice-Captains at Captain count
         if (!isCap && intPlayers.length >= advPlayers.length) {
             alert("Limit reached! You cannot add more Vice-Captains than Captains.");
             return;
         }
-
         if (advPlayers.includes(name) || intPlayers.includes(name)) return alert("Duplicate name detected!");
-        
         isCap ? advPlayers.push(name) : intPlayers.push(name);
         inp.value = ''; 
         renderLists();
@@ -192,13 +188,10 @@
     function renderLists() {
         document.getElementById('list-adv').innerHTML = advPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
         document.getElementById('list-int').innerHTML = intPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
-        
         document.getElementById('btn-to-int').classList.toggle('hidden', advPlayers.length < 2);
-        
         const diff = advPlayers.length - intPlayers.length;
         const intInp = document.getElementById('name-int');
         const intBtn = document.getElementById('add-int-btn');
-
         if (diff > 0) {
             document.getElementById('int-requirement').innerText = `Require ${diff} more Vice-Captains`;
             intInp.disabled = false;
@@ -217,18 +210,14 @@
         let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
         let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
         pairs = advPlayers.map((a, i) => ({ name: `${a} - ${sInt[i]}`, played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} }));
-        
         let pool = [];
         for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) pool.push({ tA: i, tB: j });
         pool.sort((a, b) => 0.5 - Math.random()); 
-
         matches = [];
         let totalMin = startH * 60 + startM;
-
         while (pool.length > 0) {
             let busy = new Set(), used = 0;
             pool.sort((a,b) => (pairs[a.tA].played + pairs[a.tB].played) - (pairs[b.tA].played + pairs[b.tB].played));
-            
             for (let i = 0; i < pool.length; i++) {
                 let m = pool[i];
                 if (!busy.has(m.tA) && !busy.has(m.tB) && used < courtLimit) {
@@ -260,24 +249,60 @@
                     </div>
                     <span style="flex:1;text-align:left;font-weight:bold;">${pairs[m.tB].name}</span>
                 </div>
+                <div id="hint-${i}" class="error-hint"></div>
             </div>`).join('');
     }
 
     function upd(i, side) {
         const inpA = document.getElementById(`m-${i}-a`);
         const inpB = document.getElementById(`m-${i}-b`);
+        const hint = document.getElementById(`hint-${i}`);
         const valA = parseInt(inpA.value);
         const valB = parseInt(inpB.value);
-        
         matches[i].sA = inpA.value;
         matches[i].sB = inpB.value;
-
         const hasScore = !isNaN(valA) && !isNaN(valB);
-        const winnerScore = Math.max(valA, valB);
-        const scoreDiff = Math.abs(valA - valB);
-        const isValidMatch = hasScore && winnerScore >= 21 && scoreDiff >= 2;
+        let isValidMatch = false;
+        let errorMsg = "";
+
+        if (hasScore) {
+            const high = Math.max(valA, valB);
+            const low = Math.min(valA, valB);
+            const diff = high - low;
+
+            if (high < 21) {
+                errorMsg = "Winner must reach 21";
+            } else if (high === 21) {
+                if (low <= 19) {
+                    isValidMatch = true; // Standard 21-19 or less
+                } else {
+                    errorMsg = "Must lead by 2 (e.g., 22-20)";
+                }
+            } else if (high > 21 && high < 30) {
+                if (diff === 2) {
+                    isValidMatch = true; // Deuce win like 22-20
+                } else if (low <= 19) {
+                    errorMsg = "Game finishes at 21, Please check scores"; // Prevents 22-15
+                } else {
+                    errorMsg = "Deuce! Must lead by 2";
+                }
+            } else if (high === 30) {
+                if (diff === 1 && low === 29) {
+                    isValidMatch = true; // Golden point 30-29
+                } else if (diff === 2) {
+                    isValidMatch = true; // 30-28
+                } else if (low <= 19) {
+                    errorMsg = "Game finished at 21";
+                } else {
+                    errorMsg = "Must lead by 2 or end at 30-29";
+                }
+            } else if (high > 30) {
+                errorMsg = "Maximum score is 30";
+            }
+        }
 
         matches[i].done = isValidMatch;
+        hint.innerText = isValidMatch ? "" : errorMsg;
 
         if (hasScore) {
             inpA.classList.toggle('valid', isValidMatch); inpA.classList.toggle('invalid', !isValidMatch);
@@ -289,11 +314,9 @@
             if (side === 'a') { inpB.focus(); } 
             else if (matches[i+1]) { document.getElementById(`m-${i+1}-a`).focus(); }
         }
-
         let pct = Math.round((matches.filter(m => m.done).length / matches.length) * 100);
         document.getElementById('p-bar').style.width = pct + '%';
         document.getElementById('p-text').innerText = `Progress: ${pct}%`;
-        
         updateLiveTable(); 
     }
 
@@ -314,6 +337,9 @@
     }
 
     function calculateResults() {
+        if (matches.some(m => !m.done && (m.sA || m.sB))) {
+             if (!confirm("Some scores are invalid according to badminton rules. Finish anyway?")) return;
+        }
         pairs.forEach(p => { p.played=0; p.wins=0; p.lost=0; p.points=0; p.score=0; p.results={}; });
         matches.forEach(m => {
             if(m.sA === '' || m.sB === '') return;
@@ -324,7 +350,6 @@
             if(a > b) { pairs[m.tA].wins++; pairs[m.tA].points+=2; pairs[m.tB].lost++; }
             else { pairs[m.tB].wins++; pairs[m.tB].points+=2; pairs[m.tA].lost++; }
         });
-        
         let mx = `<tr><th>Teams</th>` + pairs.map(p => `<th>${p.name}</th>`).join('') + `</tr>`;
         pairs.forEach((r, i) => {
             mx += `<tr><td><strong>${r.name}</strong></td>`;
@@ -340,11 +365,9 @@
     function showLeaderboard() {
         let sorted = [...pairs].sort((a,b) => b.points - a.points || b.score - a.score);
         document.getElementById('table-body').innerHTML = sorted.map((p, i) => `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.lost}</td><td>${p.points}</td><td>${p.score}</td></tr>`).join('');
-        
         let playoffHtml = (pairs.length >= 6) ? 
             `<h3>🏆 Semifinals</h3><p><strong>Semi 1:</strong> ${sorted[0].name} vs ${sorted[3].name}</p><p><strong>Semi 2:</strong> ${sorted[1].name} vs ${sorted[2].name}</p>` : 
             `<h3>🏆 Grand Final</h3><p>${sorted[0].name} vs ${sorted[1].name}</p>`;
-        
         document.getElementById('playoff-container').innerHTML = playoffHtml;
         showStep('leaderboard-section');
     }
