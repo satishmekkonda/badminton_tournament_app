@@ -15,6 +15,8 @@
         .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid #2563eb; margin-bottom: 30px; padding-bottom: 10px; }
         h1 { color: #1e3a8a; font-size: 2.2em; margin: 0; flex-grow: 1; text-align: center; }
         .today-date { font-size: 0.9em; color: #64748b; font-weight: bold; min-width: 100px; text-align: right; }
+        .welcome-screen { text-align: center; padding: 50px 20px; }
+        .welcome-screen h2 { font-size: 2.5em; color: #1e3a8a; margin-bottom: 30px; }
         .left-align { text-align: left; width: 100%; }
         .center-controls { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
         .input-group { display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 10px; }
@@ -27,6 +29,7 @@
         button.undo { background-color: #f59e0b; }
         button.back { background-color: #64748b; margin-top: 10px; }
         button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
+        .btn-large { padding: 15px 40px; font-size: 1.2em; border-radius: 30px; }
         .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 10px; margin-bottom: 20px; height: 20px; position: relative; overflow: hidden; }
         .progress-bar { height: 100%; background-color: #059669; width: 0%; transition: width 0.3s ease; }
         .progress-text { position: absolute; width: 100%; text-align: center; font-size: 0.8em; line-height: 20px; font-weight: bold; color: #1e3a8a; }
@@ -54,8 +57,13 @@
         <div id="date-display" class="today-date"></div>
     </div>
 
-    <div id="step-adv">
-        <h2 class="left-align">Register Player: Captains</h2>
+    <div id="step-welcome" class="welcome-screen">
+        <h2>Welcome to the Badminton Premier League, Łódź 2026</h2>
+        <button class="btn-large" onclick="showStep('step-adv')">Get Started</button>
+    </div>
+
+    <div id="step-adv" class="hidden">
+        <h2 class="left-align">Player Registration: Captains</h2>
         <div class="center-controls">
             <div class="input-group">
                 <input type="text" id="name-adv" placeholder="Name..." onkeypress="if(event.key==='Enter') addPlayer('Captains')">
@@ -68,7 +76,7 @@
     </div>
 
     <div id="step-int" class="hidden">
-        <h2 class="left-align">Register Player: Vice-Captains</h2>
+        <h2 class="left-align">Player Registration: Vice-Captains</h2>
         <div class="center-controls">
             <div id="int-requirement" style="font-weight:bold; color:#e11d48; margin-bottom:15px;"></div>
             <div class="input-group">
@@ -80,7 +88,7 @@
         <div id="list-int" class="left-align"></div>
         <div style="text-align: center; margin-top: 25px;">
             <button class="back" onclick="showStep('step-adv')">← Back</button>
-            <button id="gen-btn" class="hidden" onclick="showStep('step-courts')">Next: Setup</button>
+            <button id="gen-btn" class="hidden" onclick="showStep('step-courts')">Next</button>
         </div>
     </div>
 
@@ -274,23 +282,23 @@
                 errorMsg = "Winner must reach 21";
             } else if (high === 21) {
                 if (low <= 19) {
-                    isValidMatch = true; // Standard 21-19 or less
+                    isValidMatch = true; 
                 } else {
                     errorMsg = "Must lead by 2 (e.g., 22-20)";
                 }
             } else if (high > 21 && high < 30) {
                 if (diff === 2) {
-                    isValidMatch = true; // Deuce win like 22-20
+                    isValidMatch = true; 
                 } else if (low <= 19) {
-                    errorMsg = "Game finishes at 21, Please check scores"; // Prevents 22-15
+                    errorMsg = "Game finishes at 21, Please check scores"; 
                 } else {
                     errorMsg = "Deuce! Must lead by 2";
                 }
             } else if (high === 30) {
                 if (diff === 1 && low === 29) {
-                    isValidMatch = true; // Golden point 30-29
+                    isValidMatch = true; 
                 } else if (diff === 2) {
-                    isValidMatch = true; // 30-28
+                    isValidMatch = true; 
                 } else if (low <= 19) {
                     errorMsg = "Game finished at 21";
                 } else {
