@@ -144,16 +144,20 @@
         </div>
     </div>
 
-    <div id="step-review" class="hidden">
-        <h2 class="left-align">Review Generated Teams</h2>
-        <div id="review-list"></div>
-        <div style="text-align: center; margin-top: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button class="undo" onclick="previewTeams('strict')">Shuffle (Cap vs Vice)</button>
-            <button style="background-color: #7c3aed;" onclick="previewTeams('random')">Mix All (Random)</button>
-            <button class="finish" style="width: auto; padding: 12px 30px;" onclick="showStep('step-courts')">Confirm Teams</button>
-        </div>
-        <div style="text-align: center;"><button class="back" onclick="showStep('step-int')">← Edit Players</button></div>
+<div id="step-review" class="hidden">
+    <h2 class="left-align">Review Generated Teams</h2>
+    <div id="review-list"></div>
+    
+    <div style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+        <button class="undo" style="margin: 0;" onclick="previewTeams('strict')">Shuffle (Cap vs Vice)</button>
+        <button style="background-color: #7c3aed; margin: 0;" onclick="previewTeams('random')">Mix All (Random)</button>
+        <button class="finish" style="margin: 0; width: 100%;" onclick="showStep('step-courts')">Confirm Teams</button>
     </div>
+    
+    <div style="text-align: center; margin-top: 15px;">
+        <button class="back" onclick="showStep('step-int')">← Edit Players</button>
+    </div>
+</div>
 
     <div id="step-courts" class="hidden">
         <h2 class="left-align">Tournament Setup</h2>
