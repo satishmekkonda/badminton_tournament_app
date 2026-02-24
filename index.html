@@ -11,12 +11,45 @@
     
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #1a1a1b; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
         .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid #2563eb; margin-bottom: 30px; padding-bottom: 10px; }
         h1 { color: #1e3a8a; font-size: 2.2em; margin: 0; flex-grow: 1; text-align: center; }
         .today-date { font-size: 0.9em; color: #64748b; font-weight: bold; min-width: 100px; text-align: right; }
-        .welcome-screen { text-align: center; padding: 50px 20px; }
-        .welcome-screen h2 { font-size: 2.5em; color: #1e3a8a; margin-bottom: 30px; }
+        
+        /* ENHANCED WELCOME SCREEN */
+        .welcome-screen { 
+            text-align: center; 
+            padding: 80px 40px; 
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            border-radius: 12px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .welcome-screen::before {
+            content: "🏸";
+            position: absolute;
+            font-size: 15rem;
+            opacity: 0.1;
+            right: -50px;
+            bottom: -50px;
+            transform: rotate(-20deg);
+        }
+        .welcome-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .welcome-screen h2 { font-size: 2.8em; color: white; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .welcome-screen p { font-size: 1.2em; margin-bottom: 35px; opacity: 0.9; }
+        
         .left-align { text-align: left; width: 100%; }
         .center-controls { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
         .input-group { display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 10px; }
@@ -24,12 +57,21 @@
         .hidden { display: none; }
         input, button, select { padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; }
         input:disabled { background-color: #f1f5f9; cursor: not-allowed; }
-        button { cursor: pointer; background-color: #2563eb; color: white; border: none; font-weight: bold; transition: background 0.2s; }
-        button:hover { background-color: #1d4ed8; }
+        button { cursor: pointer; background-color: #2563eb; color: white; border: none; font-weight: bold; transition: all 0.2s; }
+        button:hover { background-color: #1d4ed8; transform: translateY(-1px); }
         button.undo { background-color: #f59e0b; }
         button.back { background-color: #64748b; margin-top: 10px; }
         button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
-        .btn-large { padding: 15px 40px; font-size: 1.2em; border-radius: 30px; }
+        .btn-get-started { 
+            background-color: #ffffff; 
+            color: #1e3a8a; 
+            padding: 18px 50px; 
+            font-size: 1.3em; 
+            border-radius: 50px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-get-started:hover { background-color: #f8fafc; color: #2563eb; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+        
         .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 10px; margin-bottom: 20px; height: 20px; position: relative; overflow: hidden; }
         .progress-bar { height: 100%; background-color: #059669; width: 0%; transition: width 0.3s ease; }
         .progress-text { position: absolute; width: 100%; text-align: center; font-size: 0.8em; line-height: 20px; font-weight: bold; color: #1e3a8a; }
@@ -58,8 +100,10 @@
     </div>
 
     <div id="step-welcome" class="welcome-screen">
-        <h2>Welcome to the Badminton Premier League, Łódź 2026</h2>
-        <button class="btn-large" onclick="showStep('step-adv')">Get Started</button>
+        <div class="welcome-logo">🏸</div>
+        <h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
+        <p>The ultimate court showdown begins here.</p>
+        <button class="btn-get-started" onclick="showStep('step-adv')">Get Started</button>
     </div>
 
     <div id="step-adv" class="hidden">
