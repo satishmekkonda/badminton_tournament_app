@@ -64,11 +64,14 @@
         button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
         .btn-get-started { 
             background-color: #ffffff; 
-            color: #1e3a8a; 
-            padding: 18px 50px; 
-            font-size: 1.3em; 
-            border-radius: 50px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+			color: #1e3a8a; 
+			padding: 18px 50px; 
+			font-size: 1.3em; 
+			border-radius: 50px; 
+			box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+			position: relative; /* Ensures it stays above the decorative background */
+			z-index: 10;        /* Forces click priority */
+			cursor: pointer;
         }
         .btn-get-started:hover { background-color: #f8fafc; color: #2563eb; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
         
@@ -96,6 +99,18 @@
         .btn-img { background: #0ea5e9; }
         .btn-email { background: #7c3aed; }
         .review-card { background: #f1f5f9; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #2563eb; text-align: left; }
+		@media (max-width: 480px) {
+        .welcome-screen {
+            padding: 40px 20px;
+        }
+        .welcome-screen h2 {
+            font-size: 1.8em;
+        }
+        .btn-get-started {
+            padding: 15px 30px; /* Makes the button a bit more thumb-friendly on small screens */
+            font-size: 1.1em;
+        }
+    }
     </style>
 </head>
 <body>
@@ -108,11 +123,13 @@
     </div>
 
     <div id="step-welcome" class="welcome-screen">
-        <div class="welcome-logo">🏸</div>
-        <h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
-        <p>The ultimate court showdown begins here.</p>
-        <button class="btn-get-started" onclick="showStep('step-adv')">Get Started</button>
-    </div>
+		<div class="welcome-logo">🏸</div>
+		<h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
+		<p>The ultimate court showdown begins here.</p>
+		<div style="margin-top: 20px;">
+			<button class="btn-get-started" onclick="showStep('step-adv')">Get Started</button>
+		</div>
+	</div>
 
     <div id="step-adv" class="hidden">
         <h2 class="left-align">Player Registration: Captains</h2>
