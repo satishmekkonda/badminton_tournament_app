@@ -88,14 +88,6 @@
         .score-input.invalid { border-color: #e11d48; background-color: #fff1f2; }
         .score-input.valid { border-color: #059669; background-color: #f0fdf4; }
         .error-hint { color: #e11d48; font-size: 0.75em; display: block; margin-top: 5px; font-weight: bold; min-height: 1em; text-align: center; }
-
-        /* Sharing Styles */
-        .share-row { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
-        .btn-share { padding: 10px 15px; font-size: 0.9em; border-radius: 6px; display: flex; align-items: center; gap: 5px; }
-        .btn-pdf { background: #dc2626; }
-        .btn-img { background: #0ea5e9; }
-        .btn-email { background: #7c3aed; }
-        .review-card { background: #f1f5f9; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #2563eb; text-align: left; }
     </style>
 </head>
 <body>
@@ -140,19 +132,8 @@
         <div id="list-int" class="left-align"></div>
         <div style="text-align: center; margin-top: 25px;">
             <button class="back" onclick="showStep('step-adv')">← Back</button>
-            <button id="gen-btn" class="hidden" onclick="previewTeams('strict')">Next</button>
+            <button id="gen-btn" class="hidden" onclick="showStep('step-courts')">Next</button>
         </div>
-    </div>
-
-    <div id="step-review" class="hidden">
-        <h2 class="left-align">Review Generated Teams</h2>
-        <div id="review-list"></div>
-        <div style="text-align: center; margin-top: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button class="undo" onclick="previewTeams('strict')">Shuffle (Cap vs Vice)</button>
-            <button style="background-color: #7c3aed;" onclick="previewTeams('random')">Mix All (Random)</button>
-            <button class="finish" style="width: auto; padding: 12px 30px;" onclick="showStep('step-courts')">Confirm Teams</button>
-        </div>
-        <div style="text-align: center;"><button class="back" onclick="showStep('step-int')">← Edit Players</button></div>
     </div>
 
     <div id="step-courts" class="hidden">
@@ -171,8 +152,8 @@
                 <select id="start-time"></select>
             </div>
             <div style="text-align: center; margin-top: 25px;">
-                <button class="back" onclick="showStep('step-review')">← Back</button>
-                <button class="finish" style="width: auto; padding: 12px 30px;" onclick="generateSchedule()">Generate Schedule</button>
+                <button class="back" onclick="showStep('step-int')">← Back</button>
+                <button class="finish" style="width: auto; padding: 12px 30px;" onclick="generateTeams()">Generate Schedule</button>
             </div>
         </div>
     </div>
@@ -197,20 +178,13 @@
     </div>
 
     <div id="results-section" class="hidden">
-        <div id="capture-results" style="padding: 10px; background: white;">
+        <div id="capture-results">
             <h2 style="text-align: center;">Group Stage Stats</h2>
             <h3>Score Matrix</h3>
             <div style="overflow-x:auto;"><table id="matrix-table"></table></div>
             <h3>Schedule Recap</h3>
             <div style="overflow-x:auto;"><table id="recap-table"></table></div>
         </div>
-        
-        <div class="share-row">
-            <button class="btn-share btn-pdf" onclick="exportPDF('capture-results', 'BPL_Results')">Save PDF</button>
-            <button class="btn-share btn-img" onclick="exportImage('capture-results', 'BPL_Results')">Save Image</button>
-            <button class="btn-share btn-email" onclick="shareEmail('capture-results')">Email</button>
-        </div>
-
         <div style="text-align: center;">
             <button class="back" onclick="showStep('tournament-section')">← Back</button>
             <button class="finish" style="width: auto; padding: 12px 30px; margin-left:10px;" onclick="showLeaderboard()">View Leaderboard & Playoffs →</button>
@@ -218,19 +192,13 @@
     </div>
 
     <div id="leaderboard-section" class="hidden">
-        <div id="capture-leaderboard" style="padding: 10px; background: white;">
+        <div id="capture-leaderboard">
             <h2 style="text-align: center;">Final Standings</h2>
             <table id="points-table">
                 <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
             <div id="playoff-container" class="playoff-box" style="background: #eff6ff; border: 2px dashed #2563eb; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;"></div>
-        </div>
-        
-        <div class="share-row">
-            <button class="btn-share btn-pdf" onclick="exportPDF('capture-leaderboard', 'BPL_Leaderboard')">Save PDF</button>
-            <button class="btn-share btn-img" onclick="exportImage('capture-leaderboard', 'BPL_Leaderboard')">Save Image</button>
-            <button class="btn-share btn-email" onclick="shareEmail('capture-leaderboard')">Email</button>
         </div>
         
         <div style="text-align: center; margin-top: 20px;">
@@ -289,48 +257,16 @@
         }
     }
 
-    // UPDATED PREVIEW TEAMS LOGIC WITH MIXING MODES
-    function previewTeams(mode) {
-        pairs = [];
-        if (mode === 'strict') {
-            // Logic: Group Vice-Captains to Captains
-            let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
-            pairs = advPlayers.map((a, i) => ({ 
-                name: `${a} - ${sInt[i]}`, 
-                played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} 
-            }));
-        } else {
-            // Logic: Mix All (Cap-Cap, Cap-Vice, or Vice-Vice)
-            let allPlayers = [...advPlayers, ...intPlayers].sort(() => Math.random() - 0.5);
-            for (let i = 0; i < allPlayers.length; i += 2) {
-                if(allPlayers[i+1]) {
-                    pairs.push({ 
-                        name: `${allPlayers[i]} - ${allPlayers[i+1]}`, 
-                        played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} 
-                    });
-                }
-            }
-        }
-        
-        document.getElementById('review-list').innerHTML = pairs.map((p, i) => `
-            <div class="review-card"><strong>Team ${i+1}:</strong> ${p.name}</div>
-        `).join('');
-        showStep('step-review');
-    }
-
-    function generateSchedule() {
+    function generateTeams() {
         const courtLimit = parseInt(document.getElementById('court-count').value);
         let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
-        
+        let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
+        pairs = advPlayers.map((a, i) => ({ name: `${a} - ${sInt[i]}`, played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} }));
         let pool = [];
         for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) pool.push({ tA: i, tB: j });
         pool.sort((a, b) => 0.5 - Math.random()); 
-        
         matches = [];
         let totalMin = startH * 60 + startM;
-        
-        pairs.forEach(p => p.played = 0);
-
         while (pool.length > 0) {
             let busy = new Set(), used = 0;
             pool.sort((a,b) => (pairs[a.tA].played + pairs[a.tB].played) - (pairs[b.tA].played + pairs[b.tB].played));
@@ -386,17 +322,35 @@
             const low = Math.min(valA, valB);
             const diff = high - low;
 
-            if (high < 21) errorMsg = "Winner must reach 21";
-            else if (high === 21) {
-                if (low <= 19) isValidMatch = true; 
-                else errorMsg = "Must lead by 2 (e.g., 22-20)";
+            if (high < 21) {
+                errorMsg = "Winner must reach 21";
+            } else if (high === 21) {
+                if (low <= 19) {
+                    isValidMatch = true; 
+                } else {
+                    errorMsg = "Must lead by 2 (e.g., 22-20)";
+                }
             } else if (high > 21 && high < 30) {
-                if (diff === 2) isValidMatch = true; 
-                else if (low <= 19) errorMsg = "Game finishes at 21"; 
-                else errorMsg = "Deuce! Must lead by 2";
+                if (diff === 2) {
+                    isValidMatch = true; 
+                } else if (low <= 19) {
+                    errorMsg = "Game finishes at 21, Please check scores"; 
+                } else {
+                    errorMsg = "Deuce! Must lead by 2";
+                }
             } else if (high === 30) {
-                isValidMatch = true;
-            } else if (high > 30) errorMsg = "Maximum score is 30";
+                if (diff === 1 && low === 29) {
+                    isValidMatch = true; 
+                } else if (diff === 2) {
+                    isValidMatch = true; 
+                } else if (low <= 19) {
+                    errorMsg = "Game finished at 21";
+                } else {
+                    errorMsg = "Must lead by 2 or end at 30-29";
+                }
+            } else if (high > 30) {
+                errorMsg = "Maximum score is 30";
+            }
         }
 
         matches[i].done = isValidMatch;
@@ -436,7 +390,7 @@
 
     function calculateResults() {
         if (matches.some(m => !m.done && (m.sA || m.sB))) {
-             if (!confirm("Some scores are invalid. Finish anyway?")) return;
+             if (!confirm("Some scores are invalid according to badminton rules. Finish anyway?")) return;
         }
         pairs.forEach(p => { p.played=0; p.wins=0; p.lost=0; p.points=0; p.score=0; p.results={}; });
         matches.forEach(m => {
@@ -463,35 +417,11 @@
     function showLeaderboard() {
         let sorted = [...pairs].sort((a,b) => b.points - a.points || b.score - a.score);
         document.getElementById('table-body').innerHTML = sorted.map((p, i) => `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.played}</td><td>${p.wins}</td><td>${p.lost}</td><td>${p.points}</td><td>${p.score}</td></tr>`).join('');
-        let playoffHtml = (pairs.length >= 4) ? 
+        let playoffHtml = (pairs.length >= 6) ? 
             `<h3>🏆 Semifinals</h3><p><strong>Semi 1:</strong> ${sorted[0].name} vs ${sorted[3].name}</p><p><strong>Semi 2:</strong> ${sorted[1].name} vs ${sorted[2].name}</p>` : 
             `<h3>🏆 Grand Final</h3><p>${sorted[0].name} vs ${sorted[1].name}</p>`;
         document.getElementById('playoff-container').innerHTML = playoffHtml;
         showStep('leaderboard-section');
-    }
-
-    async function exportImage(divId, filename) {
-        const element = document.getElementById(divId);
-        const canvas = await html2canvas(element);
-        const data = canvas.toDataURL("image/png");
-        const link = document.createElement('a');
-        link.href = data;
-        link.download = `${filename}.png`;
-        link.click();
-    }
-
-    function exportPDF(divId, filename) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'pt', 'a4');
-        doc.html(document.getElementById(divId), {
-            callback: function (doc) { doc.save(`${filename}.pdf`); },
-            x: 15, y: 15, width: 560, windowWidth: 1000
-        });
-    }
-
-    function shareEmail(divId) {
-        const email = prompt("Enter email address to send results to:");
-        if (email) alert("Preparing attachment... (EmailJS template required to complete send)");
     }
 </script>
 </body>
