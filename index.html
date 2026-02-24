@@ -28,8 +28,11 @@
         button.undo { background-color: #f59e0b; }
         button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
         button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
-        button.share-img { background-color: #0ea5e9; margin: 10px; }
-        button.share-pdf { background-color: #e11d48; margin: 10px; }
+        
+        /* Share Buttons */
+        .share-img { background-color: #0ea5e9 !important; margin: 5px; }
+        .share-pdf { background-color: #e11d48 !important; margin: 5px; }
+        .share-email { background-color: #6366f1 !important; margin: 5px; }
         
         table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
         th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: center; }
@@ -72,7 +75,7 @@
     </div>
 
     <div id="step-int" class="hidden">
-        <h2 class="left-align">Player Registration, Skill Level:  Intermediate</h2>
+        <h2 class="left-align">Player Registration, Skill Level: Intermediate</h2>
         <div class="center-controls">
             <div id="int-requirement" class="requirement-text"></div>
             <div class="input-group">
@@ -123,6 +126,7 @@
         <div style="text-align: center; margin-top: 20px;">
             <button class="share-img" onclick="shareAsImage()">📸 Share Results as Image</button>
             <button class="share-pdf" onclick="shareAsPDF()">📄 Share Results as PDF</button>
+            <button class="share-email" onclick="shareAsEmail()">📧 Share Results via Email</button>
         </div>
         <div style="text-align: center; margin-top: 30px;">
             <button onclick="location.reload()" style="background:#64748b">New Tournament</button>
@@ -134,19 +138,17 @@
     const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     document.getElementById('date-display').innerText = today;
 
-    let advPlayers = [], intPlayers = [], pairs = [], matches = [];
+    let advPlayers = [], intPlayers = [], pairs = [], matches = [], sortedResults = [];
 
     function handleEnter(event, level) { if (event.key === "Enter") { event.preventDefault(); addPlayer(level); } }
 
     function addPlayer(lvl) {
         const inp = document.getElementById(lvl === 'Advanced' ? 'name-adv' : 'name-int');
         if (!inp.value.trim()) return;
-        
         if (lvl === 'Intermediate' && intPlayers.length >= advPlayers.length) {
             alert("Intermediate players cannot exceed Advanced players.");
             return;
         }
-
         lvl === 'Advanced' ? advPlayers.push(inp.value.trim()) : intPlayers.push(inp.value.trim());
         inp.value = ''; inp.focus(); renderLists();
     }
@@ -159,12 +161,9 @@
     function renderLists() {
         document.getElementById('list-adv').innerHTML = advPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
         document.getElementById('list-int').innerHTML = intPlayers.map(p => `<span class="player-tag">${p}</span>`).join('');
-        
         document.getElementById('btn-to-int').classList.toggle('hidden', advPlayers.length < 2);
-        
         const diff = advPlayers.length - intPlayers.length;
         const reqText = document.getElementById('int-requirement');
-        
         if (diff > 0) {
             reqText.innerText = `Require ${diff} Intermediate player(s)`;
             reqText.style.color = "#e11d48";
@@ -232,7 +231,7 @@
             if (m.sA > m.sB) { pairs[m.tA].wins++; pairs[m.tA].points += 2; pairs[m.tB].lost++; }
             else { pairs[m.tB].wins++; pairs[m.tB].points += 2; pairs[m.tA].lost++; }
         });
-        const sortedResults = [...pairs].sort((a, b) => b.points - a.points || b.score - a.score);
+        sortedResults = [...pairs].sort((a, b) => b.points - a.points || b.score - a.score);
         let mx = `<tr><th>Teams</th>` + pairs.map(p => `<th>${p.name}</th>`).join('') + `</tr>`;
         pairs.forEach((r, i) => {
             mx += `<tr><td><strong>${r.name}</strong></td>`;
@@ -249,18 +248,31 @@
     async function shareAsImage() {
         const canvas = await html2canvas(document.getElementById('capture-area'));
         const link = document.createElement('a');
-        link.download = 'BPL_Results.png';
+        link.download = `BPL_Results_${today}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
     }
 
     function shareAsPDF() {
         const doc = new jspdf.jsPDF();
-        doc.text(`BPL 2026 | Łódź - Final Results`, 14, 15);
+        doc.text(`BPL 2026 | Łódź - Final Results (${today})`, 14, 15);
         doc.autoTable({ html: '#points-table', startY: 25 });
         doc.text("Score Matrix", 14, doc.lastAutoTable.finalY + 15);
         doc.autoTable({ html: '#matrix-table', startY: doc.lastAutoTable.finalY + 20 });
-        doc.save('BPL_Results.pdf');
+        doc.save(`BPL_Results_${today}.pdf`);
+    }
+
+    function shareAsEmail() {
+        let body = `BPL 2026 | Łódź - Final Results (${today})\n\n`;
+        body += `LEADER BOARD:\n`;
+        body += `Pos | Team | P | W | L | Pts | Score\n`;
+        body += `------------------------------------\n`;
+        sortedResults.forEach((p, i) => {
+            body += `${i + 1} | ${p.name} | ${p.played} | ${p.wins} | ${p.lost} | ${p.points} | ${p.score}\n`;
+        });
+        
+        const mailtoLink = `mailto:?subject=BPL 2026 Łódź Tournament Results&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoLink;
     }
 </script>
 </body>
