@@ -91,14 +91,15 @@
         .score-input.invalid { border-color: #e11d48; background-color: #fff1f2; }
         .score-input.valid { border-color: #059669; background-color: #f0fdf4; }
         .error-hint { color: #e11d48; font-size: 0.75em; display: block; margin-top: 5px; font-weight: bold; min-height: 1em; text-align: center; }
-
-        /* Sharing Styles */
+		
+		/* Sharing Styles */
         .share-row { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
         .btn-share { padding: 10px 15px; font-size: 0.9em; border-radius: 6px; display: flex; align-items: center; gap: 5px; }
         .btn-pdf { background: #dc2626; }
         .btn-img { background: #0ea5e9; }
         .btn-email { background: #7c3aed; }
         .review-card { background: #f1f5f9; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #2563eb; text-align: left; }
+		
 		@media (max-width: 480px) {
         .welcome-screen {
             padding: 40px 20px;
@@ -123,16 +124,35 @@
     </div>
 
     <div id="step-welcome" class="welcome-screen">
-		<div class="welcome-logo">🏸</div>
-		<h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
-		<p>The ultimate court showdown begins here.</p>
-		<div style="margin-top: 20px;">
-			<button class="btn-get-started" onclick="showStep('step-adv')">Get Started</button>
-		</div>
-	</div>
+        <div class="welcome-logo">🏸</div>
+        <h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
+        <p>Namasthey - Dzień dobry.</p>
+        <div style="margin-top: 20px;">
+            <button class="btn-get-started" onclick="showStep('step-manual')">Get Started</button>
+        </div>
+    </div>
+
+    <div id="step-manual" class="hidden">
+        <h2 class="left-align">Manual Team Pairing</h2>
+        <p style="font-size: 0.9em; color: #64748b;">Enter names in pairs (e.g., enter X, then Y to form Team 1).</p>
+        <div class="center-controls">
+            <div id="manual-error" style="font-weight:bold; color:#e11d48; margin-bottom:10px;"></div>
+            <div class="input-group">
+                <input type="text" id="name-manual" placeholder="Player Name..." onkeypress="if(event.key==='Enter') addManualPlayer()">
+                <button onclick="addManualPlayer()">Add Player</button>
+                <button class="undo" onclick="undoManual()">Undo</button>
+            </div>
+        </div>
+        <div id="list-manual" class="left-align"></div>
+        <div style="text-align: center; margin-top: 25px;">
+            <button class="back" style="background:#64748b;" onclick="showStep('step-adv')">Skip (Use Captains Logic)</button>
+            <button id="btn-manual-next" class="hidden" onclick="proceedManual()">Next (Confirm Pairs)</button>
+        </div>
+    </div>
 
     <div id="step-adv" class="hidden">
         <h2 class="left-align">Player Registration: Captains</h2>
+		<p style="font-size: 0.9em; color: #64748b;">Enter Captain Names for each team, who will be player 1.</p>
         <div class="center-controls">
             <div class="input-group">
                 <input type="text" id="name-adv" placeholder="Name..." onkeypress="if(event.key==='Enter') addPlayer('Captains')">
@@ -146,6 +166,7 @@
 
     <div id="step-int" class="hidden">
         <h2 class="left-align">Player Registration: Vice-Captains</h2>
+		<p style="font-size: 0.9em; color: #64748b;">Vice-Captains will be assigned randomly to each Captain, forming a double's pair.</p>
         <div class="center-controls">
             <div id="int-requirement" style="font-weight:bold; color:#e11d48; margin-bottom:15px;"></div>
             <div class="input-group">
@@ -161,20 +182,21 @@
         </div>
     </div>
 
-<div id="step-review" class="hidden">
-    <h2 class="left-align">Review Generated Teams</h2>
-    <div id="review-list"></div>
-    
-    <div style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
-        <button class="undo" style="margin: 0;" onclick="previewTeams('strict')">Shuffle (Cap vs Vice)</button>
-        <button style="background-color: #7c3aed; margin: 0;" onclick="previewTeams('random')">Mix All (Random)</button>
-        <button class="finish" style="margin: 0; width: 100%;" onclick="showStep('step-courts')">Confirm Teams</button>
+    <div id="step-review" class="hidden">
+        <h2 class="left-align">Review Generated Teams</h2>
+		<p style="font-size: 0.9em; color: #64748b;">Click Shuffle to change partner's</p>
+        <div id="review-list"></div>
+        
+        <div id="review-controls" style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+            <button class="undo" id="btn-shuffle-strict" style="margin: 0;" onclick="previewTeams('strict')">Shuffle VC</button>
+            <button style="background-color: #7c3aed; margin: 0;" id="btn-shuffle-random" onclick="previewTeams('random')">Shuffle Both</button>
+            <button class="finish" style="margin: 0; width: 100%;" onclick="showStep('step-courts')">Confirm Teams</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 15px;">
+            <button id="btn-review-back" class="back" onclick="showStep('step-int')">← Edit Players</button>
+        </div>
     </div>
-    
-    <div style="text-align: center; margin-top: 15px;">
-        <button class="back" onclick="showStep('step-int')">← Edit Players</button>
-    </div>
-</div>
 
     <div id="step-courts" class="hidden">
         <h2 class="left-align">Tournament Setup</h2>
@@ -204,7 +226,6 @@
             <div id="p-text" class="progress-text">Progress: 0%</div>
         </div>
         <div id="matches-container"></div>
-
         <div class="live-standings-box">
             <h3 style="margin-top:0; color:#1e3a8a;">📊 Live Standings</h3>
             <table style="font-size: 0.85em;">
@@ -212,7 +233,6 @@
                 <tbody id="live-body"></tbody>
             </table>
         </div>
-
         <div style="text-align: center; margin-top:20px;"><button class="back" onclick="showStep('step-courts')">← Back</button></div>
         <button id="calc-results-btn" class="finish" onclick="calculateResults()">Finish Group Stage</button>
     </div>
@@ -225,13 +245,11 @@
             <h3>Schedule Recap</h3>
             <div style="overflow-x:auto;"><table id="recap-table"></table></div>
         </div>
-        
         <div class="share-row">
             <button class="btn-share btn-pdf" onclick="exportPDF('capture-results', 'BPL_Results')">Save PDF</button>
             <button class="btn-share btn-img" onclick="exportImage('capture-results', 'BPL_Results')">Save Image</button>
             <button class="btn-share btn-email" onclick="shareEmail('capture-results')">Email</button>
         </div>
-
         <div style="text-align: center;">
             <button class="back" onclick="showStep('tournament-section')">← Back</button>
             <button class="finish" style="width: auto; padding: 12px 30px; margin-left:10px;" onclick="showLeaderboard()">View Leaderboard & Playoffs →</button>
@@ -247,13 +265,11 @@
             </table>
             <div id="playoff-container" class="playoff-box" style="background: #eff6ff; border: 2px dashed #2563eb; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;"></div>
         </div>
-        
         <div class="share-row">
             <button class="btn-share btn-pdf" onclick="exportPDF('capture-leaderboard', 'BPL_Leaderboard')">Save PDF</button>
             <button class="btn-share btn-img" onclick="exportImage('capture-leaderboard', 'BPL_Leaderboard')">Save Image</button>
             <button class="btn-share btn-email" onclick="shareEmail('capture-leaderboard')">Email</button>
         </div>
-        
         <div style="text-align: center; margin-top: 20px;">
             <button class="back" onclick="showStep('results-section')">← Back</button>
             <button onclick="location.reload()" style="background:#dc2626; color:white; padding:12px; border-radius:8px; border:none; font-weight:bold; margin-left:10px;">New Tournament</button>
@@ -266,13 +282,71 @@
     const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     document.getElementById('date-display').innerText = today;
     
-    let advPlayers = [], intPlayers = [], pairs = [], matches = [];
+    let advPlayers = [], intPlayers = [], manualPlayers = [], pairs = [], matches = [];
+    let isManualMode = false;
 
     const st = document.getElementById('start-time');
     for(let h=8; h<=22; h++) for(let m of ['00','30']) st.options.add(new Option(`${h}:${m}`, `${h}:${m}`));
 
-    function showStep(id) { document.querySelectorAll('.container > div:not(.header-row)').forEach(d => d.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+    function showStep(id) { 
+        document.querySelectorAll('.container > div:not(.header-row)').forEach(d => d.classList.add('hidden')); 
+        document.getElementById(id).classList.remove('hidden'); 
+    }
 
+    // MANUAL LOGIC
+    function addManualPlayer() {
+        const inp = document.getElementById('name-manual');
+        const name = inp.value.trim();
+        if (!name) return;
+        if (manualPlayers.includes(name)) return alert("Duplicate name!");
+        manualPlayers.push(name);
+        inp.value = '';
+        renderManualList();
+    }
+
+    function undoManual() { manualPlayers.pop(); renderManualList(); }
+
+    function renderManualList() {
+        const list = document.getElementById('list-manual');
+        let html = '';
+        for(let i=0; i<manualPlayers.length; i+=2) {
+            html += `<div style="margin-bottom:5px;">
+                <span class="player-tag">${manualPlayers[i]}</span> 
+                ${manualPlayers[i+1] ? `<span style="font-weight:bold;">&</span> <span class="player-tag">${manualPlayers[i+1]}</span>` : ''}
+            </div>`;
+        }
+        list.innerHTML = html;
+        
+        const err = document.getElementById('manual-error');
+        const btnNext = document.getElementById('btn-manual-next');
+        
+        if (manualPlayers.length > 0 && manualPlayers.length % 2 !== 0) {
+            err.innerText = "Please add one more player to complete the pair.";
+            btnNext.classList.add('hidden');
+        } else {
+            err.innerText = "";
+            btnNext.classList.toggle('hidden', manualPlayers.length < 2);
+        }
+    }
+
+    function proceedManual() {
+        isManualMode = true;
+        pairs = [];
+        for (let i = 0; i < manualPlayers.length; i += 2) {
+            pairs.push({ 
+                name: `${manualPlayers[i]} - ${manualPlayers[i+1]}`, 
+                played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} 
+            });
+        }
+        renderReview();
+        showStep('step-review');
+        // Hide shuffle buttons for manual mode
+        document.getElementById('btn-shuffle-strict').classList.add('hidden');
+        document.getElementById('btn-shuffle-random').classList.add('hidden');
+        document.getElementById('btn-review-back').onclick = () => showStep('step-manual');
+    }
+
+    // ORIGINAL PLAYER LOGIC
     function addPlayer(lvl) {
         const isCap = lvl === 'Captains';
         const inp = document.getElementById(isCap ? 'name-adv' : 'name-int');
@@ -309,19 +383,19 @@
             document.getElementById('gen-btn').classList.toggle('hidden', advPlayers.length === 0);
         }
     }
-
-    // UPDATED PREVIEW TEAMS LOGIC WITH MIXING MODES
+	
+	// UPDATED PREVIEW TEAMS LOGIC WITH MIXING MODES
     function previewTeams(mode) {
+        isManualMode = false;
         pairs = [];
         if (mode === 'strict') {
-            // Logic: Group Vice-Captains to Captains
+		// Logic: Group Vice-Captains to Captains
             let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
             pairs = advPlayers.map((a, i) => ({ 
                 name: `${a} - ${sInt[i]}`, 
                 played: 0, wins: 0, lost: 0, points: 0, score: 0, results: {} 
             }));
         } else {
-            // Logic: Mix All (Cap-Cap, Cap-Vice, or Vice-Vice)
             let allPlayers = [...advPlayers, ...intPlayers].sort(() => Math.random() - 0.5);
             for (let i = 0; i < allPlayers.length; i += 2) {
                 if(allPlayers[i+1]) {
@@ -332,24 +406,27 @@
                 }
             }
         }
-        
+        renderReview();
+        document.getElementById('btn-shuffle-strict').classList.remove('hidden');
+        document.getElementById('btn-shuffle-random').classList.remove('hidden');
+        document.getElementById('btn-review-back').onclick = () => showStep('step-int');
+        showStep('step-review');
+    }
+
+    function renderReview() {
         document.getElementById('review-list').innerHTML = pairs.map((p, i) => `
             <div class="review-card"><strong>Team ${i+1}:</strong> ${p.name}</div>
         `).join('');
-        showStep('step-review');
     }
 
     function generateSchedule() {
         const courtLimit = parseInt(document.getElementById('court-count').value);
         let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
-        
         let pool = [];
         for (let i = 0; i < pairs.length; i++) for (let j = i + 1; j < pairs.length; j++) pool.push({ tA: i, tB: j });
         pool.sort((a, b) => 0.5 - Math.random()); 
-        
         matches = [];
         let totalMin = startH * 60 + startM;
-        
         pairs.forEach(p => p.played = 0);
 
         while (pool.length > 0) {
@@ -406,7 +483,6 @@
             const high = Math.max(valA, valB);
             const low = Math.min(valA, valB);
             const diff = high - low;
-
             if (high < 21) errorMsg = "Winner must reach 21";
             else if (high === 21) {
                 if (low <= 19) isValidMatch = true; 
@@ -422,12 +498,11 @@
 
         matches[i].done = isValidMatch;
         hint.innerText = isValidMatch ? "" : errorMsg;
-
         if (hasScore) {
             inpA.classList.toggle('valid', isValidMatch); inpA.classList.toggle('invalid', !isValidMatch);
             inpB.classList.toggle('valid', isValidMatch); inpB.classList.toggle('invalid', !isValidMatch);
         }
-
+        
         const currentInput = document.getElementById(`m-${i}-${side}`);
         if (currentInput.value.length >= 2 || parseInt(currentInput.value) > 9) {
             if (side === 'a') { inpB.focus(); } 
