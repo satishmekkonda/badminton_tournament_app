@@ -125,8 +125,8 @@
 
     <div id="step-welcome" class="welcome-screen">
         <div class="welcome-logo">🏸</div>
-        <h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
-        <p>Namasthey - Dzień dobry.</p>
+        <h2>Badminton Premier League, Łódź 2026</h2>
+        <p>Welcome - Namasthey - Dzień dobry</p>
         <div style="margin-top: 20px;">
             <button class="btn-get-started" onclick="showStep('step-manual')">Get Started</button>
         </div>
@@ -145,8 +145,8 @@
         </div>
         <div id="list-manual" class="left-align"></div>
         <div style="text-align: center; margin-top: 25px;">
-            <button class="back" style="background:#64748b;" onclick="showStep('step-adv')">Skip (Use Captains Logic)</button>
-            <button id="btn-manual-next" class="hidden" onclick="proceedManual()">Next (Confirm Pairs)</button>
+            <button class="back" style="background:#64748b;" onclick="showStep('step-adv')">Skip Manual Pairing</button>
+            <button id="btn-manual-next" class="hidden" onclick="proceedManual()">Next</button>
         </div>
     </div>
 
@@ -184,12 +184,12 @@
 
     <div id="step-review" class="hidden">
         <h2 class="left-align">Review Generated Teams</h2>
-		<p style="font-size: 0.9em; color: #64748b;">Click Shuffle to change partner's</p>
+		<p style="font-size: 0.9em; color: #64748b;">Use Shuffle to change partner's</p>
         <div id="review-list"></div>
         
         <div id="review-controls" style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
             <button class="undo" id="btn-shuffle-strict" style="margin: 0;" onclick="previewTeams('strict')">Shuffle VC</button>
-            <button style="background-color: #7c3aed; margin: 0;" id="btn-shuffle-random" onclick="previewTeams('random')">Shuffle Both</button>
+            <button style="background-color: #7c3aed; margin: 0;" id="btn-shuffle-random" onclick="previewTeams('random')">Shuffle C&VC</button>
             <button class="finish" style="margin: 0; width: 100%;" onclick="showStep('step-courts')">Confirm Teams</button>
         </div>
         
