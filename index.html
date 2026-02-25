@@ -16,9 +16,37 @@
         h1 { color: #1e3a8a; font-size: 2.2em; margin: 0; flex-grow: 1; text-align: center; }
         .today-date { font-size: 0.9em; color: #64748b; font-weight: bold; min-width: 100px; text-align: right; }
         
-        .welcome-screen { text-align: center; padding: 80px 40px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 12px; color: white; position: relative; overflow: hidden; }
-        .welcome-screen::before { content: "🏸"; position: absolute; font-size: 15rem; opacity: 0.1; right: -50px; bottom: -50px; transform: rotate(-20deg); }
-        .welcome-logo { width: 120px; height: 120px; background: white; border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        /* ENHANCED WELCOME SCREEN */
+        .welcome-screen { 
+            text-align: center; 
+            padding: 80px 40px; 
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            border-radius: 12px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .welcome-screen::before {
+            content: "🏸";
+            position: absolute;
+            font-size: 15rem;
+            opacity: 0.1;
+            right: -50px;
+            bottom: -50px;
+            transform: rotate(-20deg);
+        }
+        .welcome-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
         .welcome-screen h2 { font-size: 2.8em; color: white; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .welcome-screen p { font-size: 1.2em; margin-bottom: 35px; opacity: 0.9; }
         
@@ -34,7 +62,17 @@
         button.undo { background-color: #f59e0b; }
         button.back { background-color: #64748b; margin-top: 10px; }
         button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
-        .btn-get-started { background-color: #ffffff; color: #1e3a8a; padding: 18px 50px; font-size: 1.3em; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; z-index: 10; cursor: pointer; }
+        .btn-get-started { 
+            background-color: #ffffff; 
+			color: #1e3a8a; 
+			padding: 18px 50px; 
+			font-size: 1.3em; 
+			border-radius: 50px; 
+			box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+			position: relative; /* Ensures it stays above the decorative background */
+			z-index: 10;        /* Forces click priority */
+			cursor: pointer;
+        }
         .btn-get-started:hover { background-color: #f8fafc; color: #2563eb; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
         
         .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 10px; margin-bottom: 20px; height: 20px; position: relative; overflow: hidden; }
@@ -53,12 +91,27 @@
         .score-input.invalid { border-color: #e11d48; background-color: #fff1f2; }
         .score-input.valid { border-color: #059669; background-color: #f0fdf4; }
         .error-hint { color: #e11d48; font-size: 0.75em; display: block; margin-top: 5px; font-weight: bold; min-height: 1em; text-align: center; }
+		
+		/* Sharing Styles */
         .share-row { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
         .btn-share { padding: 10px 15px; font-size: 0.9em; border-radius: 6px; display: flex; align-items: center; gap: 5px; }
         .btn-pdf { background: #dc2626; }
         .btn-img { background: #0ea5e9; }
         .btn-email { background: #7c3aed; }
         .review-card { background: #f1f5f9; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #2563eb; text-align: left; }
+		
+		@media (max-width: 480px) {
+        .welcome-screen {
+            padding: 40px 20px;
+        }
+        .welcome-screen h2 {
+            font-size: 1.8em;
+        }
+        .btn-get-started {
+            padding: 15px 30px; /* Makes the button a bit more thumb-friendly on small screens */
+            font-size: 1.1em;
+        }
+    }
     </style>
 </head>
 <body>
@@ -72,8 +125,8 @@
 
     <div id="step-welcome" class="welcome-screen">
         <div class="welcome-logo">🏸</div>
-        <h2>Welcome to the Lodz Badminton Premier League, 2026</h2>
-        <p>Namasthey - Dzień dobry.</p>
+        <h2>Badminton Premier League, Łódź 2026</h2>
+        <p>Welcome - Namasthey - Dzień dobry</p>
         <div style="margin-top: 20px;">
             <button class="btn-get-started" onclick="showStep('step-manual')">Get Started</button>
         </div>
@@ -92,8 +145,8 @@
         </div>
         <div id="list-manual" class="left-align"></div>
         <div style="text-align: center; margin-top: 25px;">
-            <button class="back" style="background:#64748b;" onclick="showStep('step-adv')">Skip (Use Captains Logic)</button>
-            <button id="btn-manual-next" class="hidden" onclick="proceedManual()">Next (Confirm Pairs)</button>
+            <button class="back" style="background:#64748b;" onclick="showStep('step-adv')">Skip Manual Pairing</button>
+            <button id="btn-manual-next" class="hidden" onclick="proceedManual()">Next</button>
         </div>
     </div>
 
@@ -131,12 +184,12 @@
 
     <div id="step-review" class="hidden">
         <h2 class="left-align">Review Generated Teams</h2>
-		<p style="font-size: 0.9em; color: #64748b;">Click Shuffle to change partner's</p>
+		<p style="font-size: 0.9em; color: #64748b;">Use Shuffle to change partner's</p>
         <div id="review-list"></div>
         
         <div id="review-controls" style="margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
             <button class="undo" id="btn-shuffle-strict" style="margin: 0;" onclick="previewTeams('strict')">Shuffle VC</button>
-            <button style="background-color: #7c3aed; margin: 0;" id="btn-shuffle-random" onclick="previewTeams('random')">Shuffle Both</button>
+            <button style="background-color: #7c3aed; margin: 0;" id="btn-shuffle-random" onclick="previewTeams('random')">Shuffle C&VC</button>
             <button class="finish" style="margin: 0; width: 100%;" onclick="showStep('step-courts')">Confirm Teams</button>
         </div>
         
@@ -330,11 +383,13 @@
             document.getElementById('gen-btn').classList.toggle('hidden', advPlayers.length === 0);
         }
     }
-
+	
+	// UPDATED PREVIEW TEAMS LOGIC WITH MIXING MODES
     function previewTeams(mode) {
         isManualMode = false;
         pairs = [];
         if (mode === 'strict') {
+		// Logic: Group Vice-Captains to Captains
             let sInt = [...intPlayers].sort(() => Math.random() - 0.5);
             pairs = advPlayers.map((a, i) => ({ 
                 name: `${a} - ${sInt[i]}`, 
