@@ -153,6 +153,22 @@ th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: center; }
 th { background-color: #f8fafc; color: #475569; font-weight: 600; }
 .self-cell { background-color: #e2e8f0; color: #94a3b8; }
 
+/* Color for Top 2 (Finals) */
+.highlight-finalist {
+    background-color: #d1fae5; /* Light Green */
+    font-weight: bold;
+}
+
+/* Color for Semis or Qualifier participants */
+.highlight-qualified {
+    background-color: #dbeafe; /* Light Blue */
+}
+
+/* Optional: Make the text bolder in highlighted rows for better readability */
+.highlight-finalist td, .highlight-qualified td {
+    color: #1e3a8a;
+}
+
 /* ====== Components (Cards, Tags, Inputs) Match Cards (Updated for Render Func) ====== */
    
 .match-card {
