@@ -122,10 +122,12 @@
         <div id="matches-container"></div>
         <div class="live-standings-box">
             <h3 style="margin-top:0; color:#1e3a8a;">📊 Live Standings</h3>
+            <div class="table-responsive">
             <table style="font-size: 0.85em;">
                 <thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
                 <tbody id="live-body"></tbody>
             </table>
+        </div>
         </div>
         <div style="text-align: center; margin-top:20px;"><button class="back" onclick="showStep('step-courts')">← Back</button></div>
         <button id="calc-results-btn" class="finish" onclick="calculateResults()">Finish Group Stage</button>
@@ -135,9 +137,9 @@
         <div id="capture-results" style="padding: 10px; background: white;">
             <h2 style="text-align: center;">Group Stage Stats</h2>
             <h3>Score Matrix</h3>
-            <div style="overflow-x:auto;"><table id="matrix-table"></table></div>
+            <div class="table-responsive"><table id="matrix-table"></table></div>
             <h3>Schedule Recap</h3>
-            <div style="overflow-x:auto;"><table id="recap-table"></table></div>
+            <div class="table-responsive"><table id="recap-table"></table></div>
         </div>
         <div class="share-row">
             <button class="btn-share btn-pdf" onclick="exportPDF('capture-results', 'BPL_Results')">Save PDF</button>
@@ -153,10 +155,12 @@
     <div id="leaderboard-section" class="hidden">
         <div id="capture-leaderboard" style="padding: 10px; background: white;">
             <h2 style="text-align: center;">Final Standings</h2>
+            <div class="table-responsive">
             <table id="points-table">
                 <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
+            </div>
             <div id="playoff-container" class="playoff-box" style="background: #eff6ff; border: 2px dashed #2563eb; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;"></div>
         </div>
         <div class="share-row">
