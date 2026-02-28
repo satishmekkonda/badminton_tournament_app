@@ -67,40 +67,34 @@
         updateLiveTable();
     }
 	
+    // ==========================================
+    // UPDATED FOR MOBILE RESPONSIVENESS
+    // ==========================================
 	function renderMatches() {
-        document.getElementById('matches-container').innerHTML = matches.map((m, i) => `
-            <div class="match-card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 10px; gap: 8px;">
+    document.getElementById('matches-container').innerHTML = matches.map((m, i) => `
+        <div class="match-card">
+            <div class="match-header">
+                <span class="round-label">Round ${m.round}</span>
+                <div>
+                    <span class="court-label">Court ${m.court}</span>
+                    <span class="time-label">${m.time}</span>
+                </div>
+            </div>
+            
+            <div class="match-content">
+                <span class="player-name-left">${pairs[m.tA].name}</span>
                 
-                <div style="min-width: 75px; text-align: left; white-space: nowrap;">
-                    <span style="font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase;">Round ${m.round}</span>
+                <div class="score-container">
+                    <input type="number" id="m-${i}-a" value="${m.sA || ''}" class="score-input ${m.done ? 'valid' : ''}" oninput="upd(${i}, 'a')" placeholder="0">
+                    <span class="score-separator">-</span>
+                    <input type="number" id="m-${i}-b" value="${m.sB || ''}" class="score-input ${m.done ? 'valid' : ''}" oninput="upd(${i}, 'b')" placeholder="0">
+                    <div id="hint-${i}" class="error-hint"></div>
                 </div>
 
-                <div style="flex: 1; display: flex; align-items: center; justify-content: center; border-left: 1px solid #eee; border-right: 1px solid #eee; padding: 0 10px;">
-                    
-                    <span style="flex: 1; text-align: right; font-weight: bold; color: #1e3a8a; font-size: 0.85rem; padding-right: 10px; line-height: 1.2;">
-                        ${pairs[m.tA].name}
-                    </span>
-
-                    <div style="display: flex; align-items: center; gap: 5px; position: relative;">
-                        <input type="number" id="m-${i}-a" value="${m.sA || ''}" class="score-input ${m.done ? 'valid' : ''}" oninput="upd(${i}, 'a')" placeholder="0" style="width:42px; text-align:center; padding: 5px; font-size: 0.95rem;">
-                        <span style="font-weight: bold; color: #9ca3af; font-size: 0.8rem;">-</span>
-                        <input type="number" id="m-${i}-b" value="${m.sB || ''}" class="score-input ${m.done ? 'valid' : ''}" oninput="upd(${i}, 'b')" placeholder="0" style="width:42px; text-align:center; padding: 5px; font-size: 0.95rem;">
-                        
-                        <div id="hint-${i}" class="error-hint" style="position: absolute; font-size: 9px; bottom: -18px; width: 150px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;"></div>
-                    </div>
-
-                    <span style="flex: 1; text-align: left; font-weight: bold; color: #1e3a8a; font-size: 0.85rem; padding-left: 10px; line-height: 1.2;">
-                        ${pairs[m.tB].name}
-                    </span>
-                </div>
-
-                <div style="min-width: 75px; text-align: right; white-space: nowrap; display: flex; flex-direction: column; gap: 2px;">
-                    <span style="font-size: 0.8rem; font-weight: 800; color: #374151; text-transform: uppercase;">Court ${m.court}</span>
-                    <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280;">${m.time}</span>
-                </div>
-
-            </div>`).join('');
-    }
+                <span class="player-name-right">${pairs[m.tB].name}</span>
+            </div>
+        </div>`).join('');
+}
 	
     function upd(i, side) {
         const inpA = document.getElementById(`m-${i}-a`);
