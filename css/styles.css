@@ -203,18 +203,45 @@ th { background-color: #f8fafc; color: #475569; font-weight: 600; }
 .player-name-left, .player-name-right {
     font-weight: bold;
     color: #1e3a8a;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     flex: 1;
-    /* ALLOW WRAPPING AND STACKING */
-    white-space: normal; 
-    word-wrap: break-word;
-    line-height: 1.1;
+    
+    /* NEW STYLES FOR VERTICAL PAIRING */
+    display: flex;
+    flex-direction: column; /* Stack name elements vertically */
+    line-height: 1.2;
+    white-space: normal; /* Allow text wrapping */
+    word-wrap: break-word; /* Break long words */
 }
 
+/* Specific alignments for left/right */
+.player-name-left {
+    text-align: right;
+    align-items: flex-end; /* Align names to the right */
+}
+
+.player-name-right {
+    text-align: left;
+    align-items: flex-start; /* Align names to the left */
+}
+
+/* ADD THIS TO STYLE THE NAME AND PAIR SEPARATOR */
+.player-name-left span, .player-name-right span {
+    display: block; /* Treat each name as a block */
+}
+
+.pair-separator {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin: 1px 0; /* Small space above and below the hyphen */
+    font-weight: normal;
+    display: block; /* Ensure it stays on its own line */
+}
 .score-container {
     display: flex;
     align-items: center;
     gap: 2px;
+    margin: 0 5px;
 }
 
 .score-input {
