@@ -183,11 +183,13 @@ th { background-color: #f8fafc; color: #475569; font-weight: 600; }
 /* Middle Content Area (Handles scrolling) */
 .match-content {
     flex: 1;
-    overflow-x: auto; /* Enables horizontal scrolling */
-    white-space: nowrap; /* Keeps names on one line */
+    overflow-x: hidden; /* Prevent horizontal scroll, names will wrap */
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     padding: 0 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .player-wrapper {
@@ -198,26 +200,15 @@ th { background-color: #f8fafc; color: #475569; font-weight: 600; }
     min-width: 200px; /* Ensures space for names before scrolling */
 }
 
-.player-name-left {
-    text-align: right;
+.player-name-left, .player-name-right {
     font-weight: bold;
     color: #1e3a8a;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Adds ... if name is too long */
-}
-
-.player-name-right {
-    text-align: left;
-    font-weight: bold;
-    color: #1e3a8a;
-    font-size: 0.85rem;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* ALLOW WRAPPING AND STACKING */
+    white-space: normal; 
+    word-wrap: break-word;
+    line-height: 1.1;
 }
 
 .score-container {
