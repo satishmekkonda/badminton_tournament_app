@@ -68,7 +68,18 @@ function generateSchedule() {
   }
 
 function renderMatches() {
-    document.getElementById('matches-container').innerHTML = matches.map((m, i) => `
+    document.getElementById('matches-container').innerHTML = matches.map((m, i) => {
+        // --- CHANGE HERE: Split names and map them to span elements with a hyphen in between ---
+        const formatNames = (nameString) => {
+            const parts = nameString.split(' - ');
+            if (parts.length < 2) return `<span>${nameString}</span>`;
+            return `<span>${parts[0]}</span><span class="pair-separator">-</span><span>${parts[1]}</span>`;
+        };
+
+        const teamANameVertical = formatNames(pairs[m.tA].name);
+        const teamBNameVertical = formatNames(pairs[m.tB].name);
+
+        return `
         <div class="match-card">
             
             <div class="match-meta-left">
@@ -79,7 +90,7 @@ function renderMatches() {
 
             <div class="match-content">
                 <div class="player-wrapper">
-                    <span class="player-name-left">${pairs[m.tA].name}</span>
+                    <div class="player-name-left">${teamANameVertical}</div>
                     
                     <div class="score-container" style="position:relative;">
                         <input type="number" id="m-${i}-a" value="${m.sA || ''}" class="score-input ${m.done ? 'valid' : ''}" oninput="upd(${i}, 'a')" placeholder="0">
@@ -88,12 +99,12 @@ function renderMatches() {
                         <div id="hint-${i}" class="error-hint"></div>
                     </div>
 
-                    <span class="player-name-right">${pairs[m.tB].name}</span>
+                    <div class="player-name-right">${teamBNameVertical}</div>
                 </div>
             </div>
 
         </div>
-    `).join('');
+    `}).join('');
 }
 
 
