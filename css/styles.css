@@ -161,25 +161,7 @@ th { background-color: #f8fafc; color: #475569; font-weight: 600; }
     border: 1px solid #e2e8f0;                
     padding: 15px;                
     margin-bottom: 10px;                
-    border-radius: 10px;
-    display: flex; /* Makes the card a flexbox */
-    flex-direction: column; /* Stacks items vertically */
-    gap: 8px; /* Adds space between items */
-    overflow-x: auto; /* Allows horizontal scroll for the card if needed */             
-}
-
-.match-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap; /* Allows labels to wrap if screen is too small */
-    gap: 5px;
-}
-
-.match-players {
-    text-align: center;
-    font-weight: bold;
-    word-wrap: break-word; /* Forces long names to wrap */
+    border-radius: 10px;                
 }
 
 .court-label, .time-label {                
