@@ -192,9 +192,11 @@ th { background-color: #f8fafc; color: #475569; font-weight: 600; }
     font-weight: bold;
 }
 
-/* Color for Semis or Qualifier participants */
+/* Color for 3rd and 4th Pos*/
 .highlight-qualified {
-    background-color: #dbeafe; /* Light Blue */
+    background-color: #f0f9ff; /* Light blue background */
+    font-weight: bold;
+    color: #0369a1;
 }
 
 /* Optional: Make the text bolder in highlighted rows for better readability */
@@ -358,4 +360,18 @@ th { background-color: #f8fafc; color: #475569; font-weight: 600; }
 /* ====== Ensure inputs fit on smaller screens ====== */
 .input-group { flex-direction: column; }
 input, select { width: 100%; box-sizing: border-box; }
+}
+
+/* Playoff's CSS Match Cards */
+.playoff-match-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+.playoff-match-card h4 {
+    margin: 0 0 10px 0;
+    color: #1e3a8a;
 }

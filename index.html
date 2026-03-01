@@ -195,15 +195,20 @@
 
     <div id="leaderboard-section" class="hidden">
         <div id="capture-leaderboard" style="padding: 10px; background: white;">
-            <h2 style="text-align: center;">Final Standings</h2>
+        
+            <h2 style="text-align: center; margin-top: 10px;">Points Table</h2>
             <div class="table-responsive">
-            <table id="points-table">
-                <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
-                <tbody id="table-body"></tbody>
-            </table>
+                <table id="points-table">
+                    <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>Score</th></tr></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
             </div>
-            <div id="playoff-container" class="playoff-box" style="background: #eff6ff; border: 2px dashed #2563eb; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;"></div>
+
+            <h2 style="text-align: center; margin-top: 30px;">🏆 Playoffs</h2>
+            <div id="playoff-matches-container" style="margin: 20px 0;"></div>
+            
         </div>
+        
         <div class="share-row">
             <button class="btn-share btn-pdf" onclick="exportPDF('capture-leaderboard', 'BPL_Leaderboard')">Save PDF</button>
             <button class="btn-share btn-img" onclick="exportImage('capture-leaderboard', 'BPL_Leaderboard')">Save Image</button>
@@ -211,7 +216,7 @@
         </div>
         <div style="text-align: center; margin-top: 20px;">
             <button class="back" onclick="showStep('results-section')">← Back</button>
-			<button onclick="clearTournament()" style="background:#dc2626; color:white; padding:12px; border-radius:8px; border:none; font-weight:bold; margin-left:10px;">New Tournament</button>
+            <button onclick="clearTournament()" style="background:#dc2626; color:white; padding:12px; border-radius:8px; border:none; font-weight:bold; margin-left:10px;">New Tournament</button>
         </div>
     </div>
 </div>
