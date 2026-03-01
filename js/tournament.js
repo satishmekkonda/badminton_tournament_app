@@ -366,4 +366,5 @@ function updatePlayoffScore(matchId, side) {
             champDiv.innerHTML = `<div style="text-align:center; font-size:1.5em; color:#16a34a; font-weight:bold; margin-top:20px;">🏆 CHAMPIONS: ${champName} 🏆</div>`;
         }
     }
+    saveData();
 }
