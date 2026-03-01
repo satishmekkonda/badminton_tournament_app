@@ -37,7 +37,8 @@ window.onload = function() {
 	
 //Not lose Entered Data on refresh
 function saveData() {
-    const data = { advPlayers, intPlayers, manualPlayers, pairs, matches, isManualMode };
+    // Added playoffScores to the object below
+    const data = { advPlayers, intPlayers, manualPlayers, pairs, matches, isManualMode, playoffScores }; 
     localStorage.setItem('bpl_2026_data', JSON.stringify(data));
 }
 
@@ -53,6 +54,7 @@ function loadData() {
         pairs = data.pairs || [];
         matches = data.matches || [];
         isManualMode = data.isManualMode || false;
+        if (data.playoffScores) playoffScores = data.playoffScores;
         
         if (window.renderLists) renderLists();
         if (window.renderManualList) renderManualList();
