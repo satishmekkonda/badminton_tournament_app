@@ -226,7 +226,6 @@ function calculateResults() {
         matches.map(m => `<tr><td>${m.time}</td><td>${m.court}</td><td>${pairs[m.tA].name} vs ${pairs[m.tB].name}</td><td>${m.sA}-${m.sB}</td></tr>`).join('');
     showStep('results-section');
 }
-
 function showLeaderboard() {
     // 1. Sort the players based on points, then score
     let sorted = [...pairs].sort((a,b) => b.points - a.points || b.score - a.score);
@@ -236,21 +235,14 @@ function showLeaderboard() {
     document.getElementById('table-body').innerHTML = sorted.map((p, i) => {
         let rowClass = '';
         
-        // --- NEW: Highlight logic based on number of players ---
-        if (numPairs >= 6) {
-            // Semifinals: Top 4 highlighted
-            if (i < 4) rowClass = 'highlight-qualified';
-        } 
-        else if (numPairs === 5) {
-            // Qualifier: 1st is special, 2nd & 3rd highlighted
-            if (i === 0) rowClass = 'highlight-finalist';
-            else if (i < 3) rowClass = 'highlight-qualified';
-        } 
-        else if (numPairs < 5 && numPairs >= 3) {
-            // Finals: Top 2 highlighted
+        // --- UPDATED: Conditional Highlighting Logic ---
+        if (numPairs >= 4) {
+            // Top 2: Green
             if (i < 2) rowClass = 'highlight-finalist';
+            // 3rd & 4th: Blue
+            else if (i < 4) rowClass = 'highlight-qualified';
         }
-        // --------------------------------------------------------
+        // ------------------------------------------------
 
         return `
             <tr class="${rowClass}">
@@ -265,24 +257,26 @@ function showLeaderboard() {
         `;
     }).join('');
 
-    // 3. --- REVISED LOGIC FOR PLAYOFF TEXT (Kept as you provided) ---
+    // 3. Playoff Text Logic
     let playoffHtml = '';
     
-    if (numPairs >= 6) {
+    if (numPairs >= 4) {
+        // Mapping names for clarity
+        const t1 = sorted[0].name;
+        const t2 = sorted[1].name;
+        const t3 = sorted[2].name;
+        const t4 = sorted[3].name;
+
         playoffHtml = `
-            <h3>🏆 Semifinals</h3>
-            <p><strong>SF1:</strong> ${sorted[0].name} vs ${sorted[3].name}</p>
-            <p><strong>SF2:</strong> ${sorted[1].name} vs ${sorted[2].name}</p>
+            <h3>🏆 Playoff's</h3>
+            <p><strong>Qualifier 1:</strong> ${t1} vs ${t2}</p>
+            <p><strong>Eliminator:</strong> ${t3} vs ${t4}</p>
+            <p><strong>Qualifier 2:</strong> [Loser Q1] vs [Winner Eliminator]</p>
+            <p><strong>Finals:</strong> [Winner Q1] vs [Winner Q2]</p>
         `;
+        
     } 
-    else if (numPairs === 5) {
-        playoffHtml = `
-            <h3>🏆 Qualifiers</h3>
-            <p><strong>OFF to Finals:</strong> ${sorted[0].name}</p>
-            <p><strong>Qualifiers :</strong> ${sorted[1].name} vs ${sorted[2].name}</p>
-        `;
-    } 
-    else if (numPairs < 5 && numPairs >= 3) {
+    else if (numPairs === 3) {
         playoffHtml = `
             <h3>🏆 Grand Final</h3>
             <p><strong>Final:</strong> ${sorted[0].name} vs ${sorted[1].name}</p>
@@ -291,7 +285,6 @@ function showLeaderboard() {
     else {
         playoffHtml = '<p>Not enough teams to generate playoffs.</p>';
     }
-    // -------------------------------------
 
     // 4. Update the playoff container and show the section
     document.getElementById('playoff-container').innerHTML = playoffHtml;
