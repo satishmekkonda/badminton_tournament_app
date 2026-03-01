@@ -1,3 +1,11 @@
+// Playoff's global object
+let playoffScores = {
+    q1: { sA: '', sB: '', done: false, teamA: '', teamB: '' },
+    elim: { sA: '', sB: '', done: false, teamA: '', teamB: '' },
+    q2: { sA: '', sB: '', done: false, teamA: '', teamB: '' },
+    final: { sA: '', sB: '', done: false, teamA: '', teamB: '' }
+};
+
 function generateSchedule() {
     const courtLimit = parseInt(document.getElementById('court-count').value);
     let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
@@ -226,24 +234,16 @@ function calculateResults() {
         matches.map(m => `<tr><td>${m.time}</td><td>${m.court}</td><td>${pairs[m.tA].name} vs ${pairs[m.tB].name}</td><td>${m.sA}-${m.sB}</td></tr>`).join('');
     showStep('results-section');
 }
+
+// 2. Updated showLeaderboard
 function showLeaderboard() {
     // 1. Sort the players based on points, then score
     let sorted = [...pairs].sort((a,b) => b.points - a.points || b.score - a.score);
     const numPairs = pairs.length;
     
-    // 2. Update the main leaderboard table HTML with conditional row highlighting
+    // 2. Update Standings Table (Now with P, W, L)
     document.getElementById('table-body').innerHTML = sorted.map((p, i) => {
-        let rowClass = '';
-        
-        // --- UPDATED: Conditional Highlighting Logic ---
-        if (numPairs >= 4) {
-            // Top 2: Green
-            if (i < 2) rowClass = 'highlight-finalist';
-            // 3rd & 4th: Blue
-            else if (i < 4) rowClass = 'highlight-qualified';
-        }
-        // ------------------------------------------------
-
+        let rowClass = (i < 2) ? 'highlight-finalist' : (i < 4 ? 'highlight-qualified' : '');
         return `
             <tr class="${rowClass}">
                 <td>${i+1}</td>
@@ -253,40 +253,117 @@ function showLeaderboard() {
                 <td>${p.lost}</td>
                 <td>${p.points}</td>
                 <td>${p.score}</td>
-            </tr>
-        `;
+            </tr>`;
     }).join('');
 
-    // 3. Playoff Text Logic
-    let playoffHtml = '';
+    // 3. Assign initial teams for playoffs if not already set
+    if (numPairs >= 4 && !playoffScores.q1.teamA) {
+        playoffScores.q1.teamA = sorted[0].name; 
+        playoffScores.q1.teamB = sorted[1].name;
+        playoffScores.elim.teamA = sorted[2].name; 
+        playoffScores.elim.teamB = sorted[3].name;
+    }
+
+    // 4. Render Playoff Cards (This appears AFTER the table in the HTML structure)
+    const container = document.getElementById('playoff-matches-container');
+    container.innerHTML = '';
     
-    if (numPairs >= 4) {
-        // Mapping names for clarity
-        const t1 = sorted[0].name;
-        const t2 = sorted[1].name;
-        const t3 = sorted[2].name;
-        const t4 = sorted[3].name;
-
-        playoffHtml = `
-            <h3>🏆 Playoff's</h3>
-            <p><strong>Qualifier 1:</strong> ${t1} vs ${t2}</p>
-            <p><strong>Eliminator:</strong> ${t3} vs ${t4}</p>
-            <p><strong>Qualifier 2:</strong> [Loser Q1] vs [Winner Eliminator]</p>
-            <p><strong>Finals:</strong> [Winner Q1] vs [Winner Q2]</p>
-        `;
-        
-    } 
-    else if (numPairs === 3) {
-        playoffHtml = `
-            <h3>🏆 Grand Final</h3>
-            <p><strong>Final:</strong> ${sorted[0].name} vs ${sorted[1].name}</p>
-        `;
-    }
-    else {
-        playoffHtml = '<p>Not enough teams to generate playoffs.</p>';
-    }
-
-    // 4. Update the playoff container and show the section
-    document.getElementById('playoff-container').innerHTML = playoffHtml;
+    container.appendChild(createMatchInput('Qualifier 1 (1st vs 2nd)', 'q1', playoffScores.q1));
+    container.appendChild(createMatchInput('Eliminator (3rd vs 4th)', 'elim', playoffScores.elim));
+    container.appendChild(createMatchInput('Qualifier 2 (L-Q1 vs W-Elim)', 'q2', playoffScores.q2));
+    container.appendChild(createMatchInput('Grand Final', 'final', playoffScores.final));
+    
     showStep('leaderboard-section');
+}
+
+// 3. Helper to create HTML for match inputs
+function createMatchInput(title, id, match) {
+    const div = document.createElement('div');
+    div.className = 'playoff-match-card';
+    div.style = "border:1px solid #e2e8f0; border-radius:8px; padding:15px; margin-bottom:10px; background:#fff;";
+    
+    div.innerHTML = `
+        <h4 style="margin: 0 0 10px 0; color: #1e3a8a;">${title}</h4>
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
+            <span id="${id}-nameA" style="font-weight:bold; width: 140px; text-align: right;">${match.teamA || 'TBD'}</span>
+            <input type="number" id="${id}-a" value="${match.sA}" oninput="updatePlayoffScore('${id}', 'a')" style="width:50px; text-align:center; padding: 5px;" placeholder="0">
+            <span style="font-weight:bold;">-</span>
+            <input type="number" id="${id}-b" value="${match.sB}" oninput="updatePlayoffScore('${id}', 'b')" style="width:50px; text-align:center; padding: 5px;" placeholder="0">
+            <span id="${id}-nameB" style="font-weight:bold; width: 140px; text-align: left;">${match.teamB || 'TBD'}</span>
+        </div>
+        <div id="${id}-hint" style="color:#ef4444; font-size:0.8em; text-align:center; margin-top:5px; height: 1em;"></div>
+    `;
+    return div;
+}
+
+// 4. The updated logic for Focus and Names
+function updatePlayoffScore(matchId, side) {
+    const inpA = document.getElementById(`${matchId}-a`);
+    const inpB = document.getElementById(`${matchId}-b`);
+    const valA = parseInt(inpA.value);
+    const valB = parseInt(inpB.value);
+    
+    playoffScores[matchId].sA = inpA.value;
+    playoffScores[matchId].sB = inpB.value;
+
+    // Validation
+    let isValidMatch = false;
+    if (!isNaN(valA) && !isNaN(valB)) {
+        const high = Math.max(valA, valB);
+        const low = Math.min(valA, valB);
+        const diff = high - low;
+        if (high === 21 && low <= 19) isValidMatch = true;
+        else if (high > 21 && high < 30 && diff === 2) isValidMatch = true;
+        else if (high === 30) isValidMatch = true;
+    }
+    playoffScores[matchId].done = isValidMatch;
+    document.getElementById(`${matchId}-hint`).innerText = (inpA.value && inpB.value && !isValidMatch) ? "Invalid Score" : "";
+
+    // --- AUTO FOCUS LOGIC (Exact reuse of your working logic) ---
+    const currentInput = document.getElementById(`${matchId}-${side}`);
+    if (currentInput.value.length >= 2 || parseInt(currentInput.value) > 9) {
+        if (side === 'a') { 
+            inpB.focus(); 
+        } else {
+            const sequence = ['q1', 'elim', 'q2', 'final'];
+            const nextIdx = sequence.indexOf(matchId) + 1;
+            if (sequence[nextIdx]) {
+                const nextInp = document.getElementById(`${sequence[nextIdx]}-a`);
+                if (nextInp) nextInp.focus();
+            }
+        }
+    }
+
+    // --- WINNER PROGRESSION ---
+    if (isValidMatch) {
+        const winner = valA > valB ? playoffScores[matchId].teamA : playoffScores[matchId].teamB;
+        const loser = valA > valB ? playoffScores[matchId].teamB : playoffScores[matchId].teamA;
+
+        if (matchId === 'q1') {
+            playoffScores.final.teamA = winner;
+            playoffScores.q2.teamA = loser;
+        } else if (matchId === 'elim') {
+            playoffScores.q2.teamB = winner;
+        } else if (matchId === 'q2') {
+            playoffScores.final.teamB = winner;
+        }
+
+        // Update Names on Screen Instantly
+        ['q1', 'elim', 'q2', 'final'].forEach(mId => {
+            document.getElementById(`${mId}-nameA`).innerText = playoffScores[mId].teamA || 'TBD';
+            document.getElementById(`${mId}-nameB`).innerText = playoffScores[mId].teamB || 'TBD';
+        });
+
+        // Show Champion if Final is done
+        if (matchId === 'final' || playoffScores.final.done) {
+            const champName = parseInt(playoffScores.final.sA) > parseInt(playoffScores.final.sB) ? playoffScores.final.teamA : playoffScores.final.teamB;
+            let champDiv = document.getElementById('champ-win');
+            if (!champDiv) {
+                champDiv = document.createElement('div');
+                champDiv.id = 'champ-win';
+                document.getElementById('playoff-matches-container').appendChild(champDiv);
+            }
+            champDiv.innerHTML = `<div style="text-align:center; font-size:1.5em; color:#16a34a; font-weight:bold; margin-top:20px;">🏆 CHAMPIONS: ${champName} 🏆</div>`;
+        }
+    }
 }
