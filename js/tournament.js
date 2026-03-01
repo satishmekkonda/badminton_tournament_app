@@ -73,8 +73,25 @@ function generateSchedule() {
         if (roundCount > 500) break;
     }
 
+    // --- NEW: POPULATE OVERVIEW TABLE ---
+    const overviewBody = document.getElementById('overview-table-body');
+    if (overviewBody) {
+        overviewBody.innerHTML = ''; // Clear previous
+        matches.forEach(m => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${m.round}</td>
+                <td>Court ${m.court}</td>
+                <td>${m.time}</td>
+                <td style="font-weight: bold;">${pairs[m.tA].name} vs ${pairs[m.tB].name}</td>
+            `;
+            overviewBody.appendChild(row);
+        });
+    }
+
     saveData(); 
-    showStep('tournament-section');
+    // Switch to Overview page instead of live section
+    showStep('step-schedule-overview');
     renderMatches();
     updateLiveTable();
 }

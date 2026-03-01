@@ -137,6 +137,39 @@ button.undo { background-color: #f59e0b; }
 button.back { background-color: #64748b; margin-top: 10px; }
 button.finish { background-color: #059669; width: 100%; margin-top: 20px; font-size: 1.1em; }
 
+/* ====== Schedule Data Representation ====== */
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+}
+
+.schedule-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.schedule-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Ensure the shared image has a clean background */
+#capture-overview {
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+
 /* ====== Tables & Data Representation ====== */
 .progress-container { width: 100%; background-color: #e2e8f0; border-radius: 10px; margin-bottom: 20px; height: 20px; position: relative; overflow: hidden; }
 .progress-bar { height: 100%; background-color: #059669; width: 0%; transition: width 0.3s ease; }
