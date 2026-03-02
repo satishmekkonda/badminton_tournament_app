@@ -280,15 +280,28 @@ function showLeaderboard() {
 function createMatchInput(title, id, match) {
     const div = document.createElement('div');
     div.className = 'playoff-match-card';
-    div.style = "border:1px solid #e2e8f0; border-radius:8px; padding:15px; margin-bottom:10px; background:#fff;";
+    // Added "position: relative" to help with alignment during capture
+    div.style = "border:1px solid #e2e8f0; border-radius:8px; padding:15px; margin-bottom:10px; background:#fff; position: relative;";
     
     div.innerHTML = `
         <h4 style="margin: 0 0 10px 0; color: #1e3a8a;">${title}</h4>
         <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
             <span id="${id}-nameA" style="font-weight:bold; width: 140px; text-align: right;">${match.teamA || 'TBD'}</span>
-            <input type="number" id="${id}-a" value="${match.sA}" oninput="updatePlayoffScore('${id}', 'a')" style="width:50px; text-align:center; padding: 5px;" placeholder="0">
+            
+            <div style="position: relative; width: 50px; height: 30px;">
+                <input type="number" id="${id}-a" value="${match.sA}" oninput="updatePlayoffScore('${id}', 'a')" 
+                       style="width:100%; text-align:center; padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="0">
+                <span class="export-only-score" style="display:none; position:absolute; top:5px; left:0; width:100%; text-align:center; font-weight:bold;">${match.sA}</span>
+            </div>
+
             <span style="font-weight:bold;">-</span>
-            <input type="number" id="${id}-b" value="${match.sB}" oninput="updatePlayoffScore('${id}', 'b')" style="width:50px; text-align:center; padding: 5px;" placeholder="0">
+
+            <div style="position: relative; width: 50px; height: 30px;">
+                <input type="number" id="${id}-b" value="${match.sB}" oninput="updatePlayoffScore('${id}', 'b')" 
+                       style="width:100%; text-align:center; padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="0">
+                <span class="export-only-score" style="display:none; position:absolute; top:5px; left:0; width:100%; text-align:center; font-weight:bold;">${match.sB}</span>
+            </div>
+
             <span id="${id}-nameB" style="font-weight:bold; width: 140px; text-align: left;">${match.teamB || 'TBD'}</span>
         </div>
         <div id="${id}-hint" style="color:#ef4444; font-size:0.8em; text-align:center; margin-top:5px; height: 1em;"></div>
@@ -308,16 +321,31 @@ function updatePlayoffScore(matchId, side) {
 
     // Validation
     let isValidMatch = false;
+    let errorMsg = ""; // Added to track specific error messages
+
     if (!isNaN(valA) && !isNaN(valB)) {
         const high = Math.max(valA, valB);
         const low = Math.min(valA, valB);
         const diff = high - low;
-        if (high === 21 && low <= 19) isValidMatch = true;
-        else if (high > 21 && high < 30 && diff === 2) isValidMatch = true;
-        else if (high === 30) isValidMatch = true;
+
+        if (high < 21) {
+            errorMsg = "Winner must reach 21";
+        } else if (high === 21) {
+            if (low <= 19) isValidMatch = true; 
+            else errorMsg = "Must lead by 2 (e.g., 22-20)";
+        } else if (high > 21 && high < 30) {
+            if (diff === 2) isValidMatch = true; 
+            else errorMsg = "Deuce! Must lead by 2";
+        } else if (high === 30) {
+            isValidMatch = true;
+        } else if (high > 30) {
+            errorMsg = "Maximum score is 30"; // Matches Group Stage logic
+        }
     }
+
     playoffScores[matchId].done = isValidMatch;
-    document.getElementById(`${matchId}-hint`).innerText = (inpA.value && inpB.value && !isValidMatch) ? "Invalid Score" : "";
+    // Updated to show the specific errorMsg
+    document.getElementById(`${matchId}-hint`).innerText = (inpA.value && inpB.value && !isValidMatch) ? errorMsg : "";
 
     // --- AUTO FOCUS LOGIC (Exact reuse of your working logic) ---
     const currentInput = document.getElementById(`${matchId}-${side}`);
