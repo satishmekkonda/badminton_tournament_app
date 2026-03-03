@@ -62,6 +62,19 @@ function loadData() {
         if (matches.length > 0) {
             if (window.renderMatches) renderMatches();
             if (window.updateLiveTable) updateLiveTable();
+
+            // --- FIX: Rebuild Overview Table on load to prevent empty display ---
+            const overviewBody = document.getElementById('overview-table-body');
+            if (overviewBody) {
+                overviewBody.innerHTML = matches.map(m => `
+                    <tr>
+                        <td>${m.round}</td>
+                        <td>Court ${m.court}</td>
+                        <td>${m.time}</td>
+                        <td style="font-weight: bold;">${pairs[m.tA].name} vs ${pairs[m.tB].name}</td>
+                    </tr>
+                `).join('');
+            }
         }
 
         if (lastStep && lastStep !== 'step-welcome') {
