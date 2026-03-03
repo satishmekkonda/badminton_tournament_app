@@ -61,11 +61,42 @@ async function exportImage(divId, filename) {
 
     document.body.removeChild(tempContainer);
 
+    // --- UPDATED: MOBILE PREVIEW FOR LONG-PRESS SAVING ---
     const data = canvas.toDataURL("image/png");
-    const link = document.createElement('a');
-    link.href = data;
-    link.download = `${filename}.png`;
-    link.click();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'image-preview-overlay';
+    overlay.style = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); z-index: 10000;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; padding: 20px; box-sizing: border-box;
+    `;
+
+    overlay.innerHTML = `
+        <div style="background: white; padding: 15px; border-radius: 12px; text-align: center; max-width: 95%;">
+            <p style="color: #333; font-weight: bold; margin-bottom: 10px; font-family: sans-serif; font-size: 14px;">
+                Mobile: Hold image to "Save to Photos"<br>
+                Desktop: Right-click to "Save Image As"
+            </p>
+            
+            <img src="${data}" style="max-width: 100%; max-height: 60vh; border: 1px solid #ddd; border-radius: 4px;">
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <a href="${data}" download="${filename}.png" 
+                   style="flex: 1; text-decoration: none; background: #16a34a; color: white; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; font-family: sans-serif;">
+                   Download File
+                </a>
+                
+                <button onclick="document.getElementById('image-preview-overlay').remove()" 
+                        style="flex: 1; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
 }
 
 function exportPDF(divId, filename) {
