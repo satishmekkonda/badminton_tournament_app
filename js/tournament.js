@@ -10,6 +10,13 @@ function generateSchedule() {
     const courtLimit = parseInt(document.getElementById('court-count').value);
     let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
     
+    // --- STEP A: BACKUP SCORES USING SORTED TEAM KEYS ---
+    const scoreBackup = {};
+    matches.forEach(m => {
+        const key = [m.tA, m.tB].sort().join('-');
+        scoreBackup[key] = { sA: m.sA, sB: m.sB, done: m.done };
+    });
+
     // 1. Create the pool of all possible matchups
     let pool = [];
     for (let i = 0; i < pairs.length; i++) {
@@ -55,7 +62,16 @@ function generateSchedule() {
                     match.court = usedCourts + 1;
                     
                     match.round = roundCount; 
-                    match.sA = ''; match.sB = ''; match.done = false;
+                    
+                    // --- STEP B: RESTORE BACKED UP SCORES ---
+                    const key = [match.tA, match.tB].sort().join('-');
+                    if (scoreBackup[key]) {
+                        match.sA = scoreBackup[key].sA;
+                        match.sB = scoreBackup[key].sB;
+                        match.done = scoreBackup[key].done;
+                    } else {
+                        match.sA = ''; match.sB = ''; match.done = false;
+                    }
 
                     // Move match from pool to the actual matches array
                     matches.push(match);
@@ -241,7 +257,7 @@ function showLeaderboard() {
     let sorted = [...pairs].sort((a,b) => b.points - a.points || b.score - a.score);
     const numPairs = pairs.length;
     
-    // 2. Update Standings Table (Now with P, W, L)
+    // 2. Update Standings Table
     document.getElementById('table-body').innerHTML = sorted.map((p, i) => {
         let rowClass = (i < 2) ? 'highlight-finalist' : (i < 4 ? 'highlight-qualified' : '');
         return `
@@ -256,15 +272,19 @@ function showLeaderboard() {
             </tr>`;
     }).join('');
 
-    // 3. Assign initial teams for playoffs if not already set
-    if (numPairs >= 4 && !playoffScores.q1.teamA) {
-        playoffScores.q1.teamA = sorted[0].name; 
-        playoffScores.q1.teamB = sorted[1].name;
-        playoffScores.elim.teamA = sorted[2].name; 
-        playoffScores.elim.teamB = sorted[3].name;
+    // --- LOGIC: UPDATE PLAYOFF NAMES IF NO SCORES ENTERED ---
+    if (numPairs >= 4) {
+        if (!playoffScores.q1.done && !playoffScores.q1.sA && !playoffScores.q1.sB) {
+            playoffScores.q1.teamA = sorted[0].name; 
+            playoffScores.q1.teamB = sorted[1].name;
+        }
+        if (!playoffScores.elim.done && !playoffScores.elim.sA && !playoffScores.elim.sB) {
+            playoffScores.elim.teamA = sorted[2].name; 
+            playoffScores.elim.teamB = sorted[3].name;
+        }
     }
 
-    // 4. Render Playoff Cards (This appears AFTER the table in the HTML structure)
+    // 4. Render Playoff Cards
     const container = document.getElementById('playoff-matches-container');
     container.innerHTML = '';
     
@@ -272,8 +292,35 @@ function showLeaderboard() {
     container.appendChild(createMatchInput('Eliminator (3rd vs 4th)', 'elim', playoffScores.elim));
     container.appendChild(createMatchInput('Qualifier 2 (L-Q1 vs W-Elim)', 'q2', playoffScores.q2));
     container.appendChild(createMatchInput('Grand Final', 'final', playoffScores.final));
+
+    // Show Champion if Final is done
+    if (playoffScores.final.done) {
+        const champName = parseInt(playoffScores.final.sA) > parseInt(playoffScores.final.sB) ? playoffScores.final.teamA : playoffScores.final.teamB;
+        let champDiv = document.getElementById('champ-win');
+        if (!champDiv) {
+            champDiv = document.createElement('div');
+            champDiv.id = 'champ-win';
+            container.appendChild(champDiv);
+        }
+        champDiv.innerHTML = `<div style="text-align:center; font-size:1.5em; color:#16a34a; font-weight:bold; margin-top:20px;">🏆 CHAMPIONS: ${champName} 🏆</div>`;
+    }
     
+    saveData();
     showStep('leaderboard-section');
+}
+
+// Function to handle the Reset Playoff Bracket logic
+function resetPlayoffs() {
+    if (confirm("Reset playoff scores? This will clear all playoff results but keep your Group Stage data.")) {
+        playoffScores = {
+            q1: { sA: '', sB: '', done: false, teamA: '', teamB: '' },
+            elim: { sA: '', sB: '', done: false, teamA: '', teamB: '' },
+            q2: { sA: '', sB: '', done: false, teamA: '', teamB: '' },
+            final: { sA: '', sB: '', done: false, teamA: '', teamB: '' }
+        };
+        saveData();
+        showLeaderboard(); 
+    }
 }
 
 // 3. Helper to create HTML for match inputs
