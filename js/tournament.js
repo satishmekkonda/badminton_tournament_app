@@ -233,31 +233,84 @@ function updateLiveTable() {
 }
 
 function calculateResults() {
-    if (matches.some(m => !m.done && (m.sA || m.sB))) {
-         if (!confirm("Some scores are invalid. Finish anyway?")) return;
-    }
-    pairs.forEach(p => { p.played=0; p.wins=0; p.lost=0; p.points=0; p.score=0; p.results={}; });
+    // 1. Initialize stats for all pairs
+    pairs.forEach(p => {
+        p.p = 0; p.w = 0; p.l = 0; p.pts = 0; p.score = 0;
+    });
+
+    // 2. Calculate from matches
     matches.forEach(m => {
-        if(m.sA === '' || m.sB === '') return;
-        let a = parseInt(m.sA), b = parseInt(m.sB);
-        pairs[m.tA].played++; pairs[m.tB].played++;
-        pairs[m.tA].score += a; pairs[m.tB].score += b;
-        pairs[m.tA].results[m.tB] = `${a}-${b}`; pairs[m.tB].results[m.tA] = `${b}-${a}`;
-        if(a > b) { pairs[m.tA].wins++; pairs[m.tA].points+=2; pairs[m.tB].lost++; }
-        else { pairs[m.tB].wins++; pairs[m.tB].points+=2; pairs[m.tA].lost++; }
+        if (m.done) {
+            const sA = parseInt(m.sA) || 0;
+            const sB = parseInt(m.sB) || 0;
+            pairs[m.tA].p++;
+            pairs[m.tB].p++;
+            pairs[m.tA].score += sA;
+            pairs[m.tB].score += sB;
+
+            if (sA > sB) {
+                pairs[m.tA].w++; pairs[m.tA].pts += 2;
+                pairs[m.tB].l++;
+            } else if (sB > sA) {
+                pairs[m.tB].w++; pairs[m.tB].pts += 2;
+                pairs[m.tA].l++;
+            } else {
+                pairs[m.tA].pts += 1; pairs[m.tB].pts += 1;
+            }
+        }
     });
-    let mx = `<tr><th>Teams</th>` + pairs.map(p => `<th>${p.name}</th>`).join('') + `</tr>`;
-    pairs.forEach((r, i) => {
-        mx += `<tr><td><strong>${r.name}</strong></td>`;
-        pairs.forEach((_, j) => mx += (i===j) ? `<td class="self-cell">X</td>` : `<td>${r.results[j] || '—'}</td>`);
-        mx += `</tr>`;
+
+    // --- SCORE MATRIX GENERATION ---
+    const matrix = document.getElementById('matrix-table');
+    let header = '<tr><th>Team</th>' + pairs.map(p => `<th>${p.name}</th>`).join('') + '</tr>';
+    let rows = '';
+
+    for (let i = 0; i < pairs.length; i++) {
+        let row = `<tr><td><strong>${pairs[i].name}</strong></td>`;
+        for (let j = 0; j < pairs.length; j++) {
+            if (i === j) {
+                row += `<td style="background:#f1f5f9;">-</td>`;
+            } else {
+                // NEW: Find ALL matches between these two teams
+                const pairMatches = matches.filter(m => 
+                    (m.tA === i && m.tB === j) || (m.tA === j && m.tB === i)
+                );
+
+                // Format scores: if Team i is tA, show sA-sB, else show sB-sA
+                let scoreDisplay = pairMatches
+                    .filter(m => m.done)
+                    .map(m => {
+                        return m.tA === i ? `${m.sA}-${m.sB}` : `${m.sB}-${m.sA}`;
+                    })
+                    .join('<br>'); // Use <br> to stack multiple scores neatly
+
+                row += `<td>${scoreDisplay || ''}</td>`;
+            }
+        }
+        row += '</tr>';
+        rows += row;
+    }
+    matrix.innerHTML = header + rows;
+
+    // --- RECAP TABLE GENERATION ---
+    const recap = document.getElementById('recap-table');
+    recap.innerHTML = '<thead><tr><th>Round</th><th>Match</th><th>Result</th></tr></thead>';
+    const recapBody = document.createElement('tbody');
+    matches.forEach(m => {
+        const tr = document.createElement('tr');
+        // Added Set info here as well for the recap
+        const setLabel = m.setNum > 1 ? `<small>(S${m.setNum})</small> ` : '';
+        tr.innerHTML = `
+            <td>${m.round}</td>
+            <td>${setLabel}${pairs[m.tA].name} vs ${pairs[m.tB].name}</td>
+            <td>${m.done ? `<strong>${m.sA} - ${m.sB}</strong>` : '<em>Pending</em>'}</td>
+        `;
+        recapBody.appendChild(tr);
     });
-    document.getElementById('matrix-table').innerHTML = mx;
-    document.getElementById('recap-table').innerHTML = `<thead><tr><th>Time</th><th>Court</th><th>Match</th><th>Score</th></tr></thead>` + 
-        matches.map(m => `<tr><td>${m.time}</td><td>${m.court}</td><td>${pairs[m.tA].name} vs ${pairs[m.tB].name}</td><td>${m.sA}-${m.sB}</td></tr>`).join('');
+    recap.appendChild(recapBody);
+
     showStep('results-section');
 }
-
 // 2. Updated showLeaderboard
 function showLeaderboard() {
     // 1. Sort the players based on points, then score
