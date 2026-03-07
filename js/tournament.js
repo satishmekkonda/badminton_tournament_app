@@ -235,7 +235,7 @@ function updateLiveTable() {
 function calculateResults() {
     // 1. Initialize stats for all pairs
     pairs.forEach(p => {
-        p.p = 0; p.w = 0; p.l = 0; p.pts = 0; p.score = 0;
+        p.played = 0; p.wins = 0; p.lost = 0; p.points = 0; p.score = 0;
     });
 
     // 2. Calculate from matches
@@ -243,19 +243,17 @@ function calculateResults() {
         if (m.done) {
             const sA = parseInt(m.sA) || 0;
             const sB = parseInt(m.sB) || 0;
-            pairs[m.tA].p++;
-            pairs[m.tB].p++;
+            pairs[m.tA].played++;
+            pairs[m.tB].played++;
             pairs[m.tA].score += sA;
             pairs[m.tB].score += sB;
 
             if (sA > sB) {
-                pairs[m.tA].w++; pairs[m.tA].pts += 2;
-                pairs[m.tB].l++;
+                pairs[m.tA].wins++; pairs[m.tA].points += 2;
+                pairs[m.tB].lost++;
             } else if (sB > sA) {
-                pairs[m.tB].w++; pairs[m.tB].pts += 2;
-                pairs[m.tA].l++;
-            } else {
-                pairs[m.tA].pts += 1; pairs[m.tB].pts += 1;
+                pairs[m.tB].wins++; pairs[m.tB].points += 2;
+                pairs[m.tA].lost++;
             }
         }
     });
@@ -298,11 +296,9 @@ function calculateResults() {
     const recapBody = document.createElement('tbody');
     matches.forEach(m => {
         const tr = document.createElement('tr');
-        // Added Set info here as well for the recap
-        const setLabel = m.setNum > 1 ? `<small>(S${m.setNum})</small> ` : '';
         tr.innerHTML = `
             <td>${m.round}</td>
-            <td>${setLabel}${pairs[m.tA].name} vs ${pairs[m.tB].name}</td>
+            <td>${pairs[m.tA].name} vs ${pairs[m.tB].name}</td>
             <td>${m.done ? `<strong>${m.sA} - ${m.sB}</strong>` : '<em>Pending</em>'}</td>
         `;
         recapBody.appendChild(tr);
@@ -311,6 +307,7 @@ function calculateResults() {
 
     showStep('results-section');
 }
+
 // 2. Updated showLeaderboard
 function showLeaderboard() {
     // 1. Sort the players based on points, then score
@@ -485,13 +482,17 @@ function updatePlayoffScore(matchId, side) {
 
         // Update Names on Screen Instantly
         ['q1', 'elim', 'q2', 'final'].forEach(mId => {
-            document.getElementById(`${mId}-nameA`).innerText = playoffScores[mId].teamA || 'TBD';
-            document.getElementById(`${mId}-nameB`).innerText = playoffScores[mId].teamB || 'TBD';
+            const elA = document.getElementById(`${mId}-nameA`);
+            const elB = document.getElementById(`${mId}-nameB`);
+            if(elA) elA.innerText = playoffScores[mId].teamA || 'TBD';
+            if(elB) elB.innerText = playoffScores[mId].teamB || 'TBD';
         });
 
         // Show Champion if Final is done
         if (matchId === 'final' || playoffScores.final.done) {
-            const champName = parseInt(playoffScores.final.sA) > parseInt(playoffScores.final.sB) ? playoffScores.final.teamA : playoffScores.final.teamB;
+            const fA = parseInt(playoffScores.final.sA);
+            const fB = parseInt(playoffScores.final.sB);
+            const champName = fA > fB ? playoffScores.final.teamA : playoffScores.final.teamB;
             let champDiv = document.getElementById('champ-win');
             if (!champDiv) {
                 champDiv = document.createElement('div');
