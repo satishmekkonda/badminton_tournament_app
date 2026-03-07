@@ -8,25 +8,32 @@ let playoffScores = {
 
 function generateSchedule() {
     const courtLimit = parseInt(document.getElementById('court-count').value);
+    // NEW: Get the number of Round Robin sets (1-5)
+    const rrSets = parseInt(document.getElementById('rr-matches').value) || 1;
     let [startH, startM] = document.getElementById('start-time').value.split(':').map(Number);
     
     // --- STEP A: BACKUP SCORES USING SORTED TEAM KEYS ---
     const scoreBackup = {};
     matches.forEach(m => {
-        const key = [m.tA, m.tB].sort().join('-');
+        // Updated key to include set number to distinguish between repeat matches
+        const key = [m.tA, m.tB].sort().join('-') + '_s' + (m.setNum || 1);
         scoreBackup[key] = { sA: m.sA, sB: m.sB, done: m.done };
     });
 
     // 1. Create the pool of all possible matchups
     let pool = [];
-    for (let i = 0; i < pairs.length; i++) {
-        for (let j = i + 1; j < pairs.length; j++) {
-            pool.push({ tA: i, tB: j });
+    // Enhanced: Repeat the pool generation based on rrSets
+    for (let s = 1; s <= rrSets; s++) {
+        let setPool = [];
+        for (let i = 0; i < pairs.length; i++) {
+            for (let j = i + 1; j < pairs.length; j++) {
+                setPool.push({ tA: i, tB: j, setNum: s });
+            }
         }
+        // 2. Randomize initial order to avoid same patterns every tournament
+        setPool.sort((a, b) => 0.5 - Math.random()); 
+        pool.push(...setPool);
     }
-    
-    // 2. Randomize initial order to avoid same patterns every tournament
-    pool.sort((a, b) => 0.5 - Math.random()); 
     
     matches = [];
     let totalMin = startH * 60 + startM;
@@ -51,7 +58,7 @@ function generateSchedule() {
             // Check: Are both teams free this round AND is there a court available?
             if (!busy.has(m.tA) && !busy.has(m.tB) && usedCourts < courtLimit) {
                 // Find the index of this match in the original pool
-                let poolIndex = pool.findIndex(p => p.tA === m.tA && p.tB === m.tB);
+                let poolIndex = pool.findIndex(p => p.tA === m.tA && p.tB === m.tB && p.setNum === m.setNum);
                 
                 if (poolIndex !== -1) {
                     let match = pool.splice(poolIndex, 1)[0];
@@ -64,7 +71,7 @@ function generateSchedule() {
                     match.round = roundCount; 
                     
                     // --- STEP B: RESTORE BACKED UP SCORES ---
-                    const key = [match.tA, match.tB].sort().join('-');
+                    const key = [match.tA, match.tB].sort().join('-') + '_s' + match.setNum;
                     if (scoreBackup[key]) {
                         match.sA = scoreBackup[key].sA;
                         match.sB = scoreBackup[key].sB;
@@ -94,7 +101,7 @@ function generateSchedule() {
         roundCount++;
 
         // Safety check to prevent infinite loops
-        if (roundCount > 500) break;
+        if (roundCount > 1000) break;
     }
 
     // --- NEW: POPULATE OVERVIEW TABLE ---
